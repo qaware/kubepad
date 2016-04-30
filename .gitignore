@@ -12,5 +12,8 @@ target/
 .gradle/
 build/
 
+kubernetes/
+kubernetes.*
+
 # OSX
 *.DS_Store

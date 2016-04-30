@@ -1,0 +1,112 @@
+buildscript {
+    ext {
+        kotlinVersion = '1.0.1-2'
+        slf4jVersion = '1.7.20'
+        spekVersion = '1.0.0'
+    }
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven {
+            url "http://repository.jetbrains.com/all"
+        }
+    }
+    dependencies {
+        classpath "nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+    }
+}
+
+repositories {
+    flatDir {
+        dirs 'lib'
+    }
+    jcenter()
+    mavenCentral()
+    maven {
+        url "http://repository.jetbrains.com/all"
+    }
+}
+
+apply plugin: 'application'
+apply plugin: 'kotlin'
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: "com.github.hierynomus.license"
+
+license {
+    skipExistingHeaders = true
+    header rootProject.file('../LICENSE')
+    includes(["**/*.java", "**/*.kt", "**/*.groovy"])
+    mapping {
+        java = 'SLASHSTAR_STYLE'
+        kt = 'SLASHSTAR_STYLE'
+        groovy = 'SLASHSTAR_STYLE'
+    }
+}
+
+group = 'de.qaware.cloud.nativ.k8s'
+version = '1.0.0'
+
+mainClassName = 'de.qaware.cloud.nativ.k8s.control.CloudLaunchpadApplication'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+
+    compile 'io.fabric8:kubernetes-api:2.2.101'
+    compile 'io.fabric8:kubernetes-client:1.3.78'
+
+    compile ':LeapJava:2.3.1'
+
+    compile "org.slf4j:slf4j-api:$slf4jVersion"
+    compile 'org.apache.deltaspike.cdictrl:deltaspike-cdictrl-api:1.5.4'
+    compile 'org.apache.deltaspike.core:deltaspike-core-api:1.5.4'
+    compile 'javax.enterprise:cdi-api:2.0-EDR1'
+
+    runtime "org.slf4j:jcl-over-slf4j:$slf4jVersion"
+    compile "org.slf4j:jul-to-slf4j:$slf4jVersion"
+    runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.5'
+    runtime 'org.apache.logging.log4j:log4j-core:2.5'
+    runtime 'org.apache.deltaspike.cdictrl:deltaspike-cdictrl-weld:1.5.4'
+    runtime 'org.apache.deltaspike.core:deltaspike-core-impl:1.5.4'
+    runtime 'org.jboss.weld.se:weld-se-core:2.3.3.Final'
+    runtime 'org.jboss:jandex:2.0.2.Final'
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+    testCompile 'org.hamcrest:hamcrest-library:1.3'
+    testRuntime 'cglib:cglib-nodep:3.1'
+    testRuntime 'org.objenesis:objenesis:2.1'
+    testCompile "org.jetbrains.spek:spek:$version"
+}
+
+sourceSets {
+    test {
+        // if you truly want to override the defaults
+        output.resourcesDir = 'build/classes/test'
+    }
+    main {
+        // if you truly want to override the defaults
+        output.resourcesDir = 'build/classes/main'
+    }
+}
+
+test {
+    // exclude the technology integration tests
+    exclude '**/*IT.class'
+
+    jvmArgs '-Djava.library.path=./lib'
+
+    reports {
+        junitXml.enabled = false
+        html.enabled = true
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.12'
+}

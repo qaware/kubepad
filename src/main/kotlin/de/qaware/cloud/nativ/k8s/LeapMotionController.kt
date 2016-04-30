@@ -59,6 +59,9 @@ open class LeapMotionController @Inject constructor(private val launchpad: Launc
             enabled = true
         } catch (e: Exception) {
             enabled = false
+        } catch (e: UnsatisfiedLinkError) {
+            logger.warn("You need to set -Djava.library.path to point to your Leap motion libs.")
+            enabled = false
         }
     }
 

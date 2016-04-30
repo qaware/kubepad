@@ -49,7 +49,7 @@ group = 'de.qaware.cloud.nativ.k8s'
 version = '1.0.0'
 
 mainClassName = 'de.qaware.cloud.nativ.k8s.KubepadApplication'
-applicationDefaultJvmArgs = ["-Djava.library.path=./lib"]
+applicationDefaultJvmArgs = ['-Djava.library.path=../lib']
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8

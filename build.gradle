@@ -36,7 +36,7 @@ apply plugin: "com.github.hierynomus.license"
 
 license {
     skipExistingHeaders = true
-    header rootProject.file('../LICENSE')
+    header rootProject.file('LICENSE')
     includes(["**/*.java", "**/*.kt", "**/*.groovy"])
     mapping {
         java = 'SLASHSTAR_STYLE'
@@ -48,7 +48,8 @@ license {
 group = 'de.qaware.cloud.nativ.k8s'
 version = '1.0.0'
 
-mainClassName = 'de.qaware.cloud.nativ.k8s.control.CloudLaunchpadApplication'
+mainClassName = 'de.qaware.cloud.nativ.k8s.KubepadApplication'
+applicationDefaultJvmArgs = ["-Djava.library.path=./lib"]
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -107,6 +108,12 @@ test {
     }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.12'
+distributions {
+    main {
+        contents {
+            from("lib") {
+                into "lib"
+            }
+        }
+    }
 }

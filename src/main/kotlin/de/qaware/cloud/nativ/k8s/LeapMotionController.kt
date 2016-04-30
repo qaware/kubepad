@@ -64,8 +64,9 @@ open class LeapMotionController @Inject constructor(private val launchpad: Launc
 
     @PreDestroy
     open fun disconnect() {
-        controller.removeListener(listener)
-        connected = false
+        if (enabled) {
+            controller.removeListener(listener)
+            connected = false
+        }
     }
-
 }

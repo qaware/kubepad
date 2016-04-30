@@ -13,7 +13,7 @@ target/
 build/
 
 kubernetes/
-kubernetes.*
+kubernetes.tar.gz
 
 # OSX
 *.DS_Store

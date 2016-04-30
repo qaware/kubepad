@@ -1,3 +1,8 @@
+image:https://travis-ci.org/qaware/kubepad.svg?branch=master["Build Status", link="https://travis-ci.org/qaware/kubepad"]
+image:https://badge.waffle.io/qaware/kubepad.png?label=ready&title=Ready["Stories in Ready", link="http://waffle.io/qaware/kubepad"]
+image:https://badge.waffle.io/qaware/kubepad.png?label=in%20progress&title=In%20Progress["Stories in Progress", link="http://waffle.io/qaware/kubepad"]
+image:https://img.shields.io/badge/license-MIT%20License-blue.svg["MIT License", link=https://github.com/qaware/kubepad/blob/master/LICENSE"]
+
 = Kubepad
 
 A Kubernetes cluster remote control using a Novation launchpad MIDI controller.

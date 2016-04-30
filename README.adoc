@@ -1,6 +1,8 @@
 = Kubepad
 
-image::kubepad-in-action.jpg[K8S Cloud Launchpad, 430, 430]
+A Kubernetes cluster remote control using a Novation launchpad MIDI controller.
+
+image::kubepad-in-action.jpg[K8S Cloud Launchpad, 400, 400]
 
 == Usage
 
@@ -24,8 +26,8 @@ row selection down or up.
 * http://www.thomann.de/de/novation_launchpad_mk2.htm[Novation Launchpad MK2]
 * https://novationmusic.de/sites/default/files/novation/downloads/10529/launchpad-mk2-programmers-reference-guide_0.pdf[Launchpad MK2 Programmers Reference Guide]
 * http://de.slideshare.net/kubecon/kubecon-eu-2016-kubernetes-hardware-hacks-exploring-the-kubernetes-api-through-knobs-faders-and-sliders[KubeCon EU 2016: Kubernetes Hardware Hacks: Exploring the Kubernetes API Through Knobs, Faders, and Sliders]
-* https://github.com/fabric8io/fabric8/tree/master/components/kubernetes-api[Kubernetes API]
-* https://github.com/fabric8io/kubernetes-client[GitHub Kubernetes Client]
+* https://github.com/fabric8io/fabric8/tree/master/components/kubernetes-api[Fabric8 Kubernetes API]
+* https://github.com/fabric8io/kubernetes-client[Fabric8 Kubernetes Client]
 * http://docs.oracle.com/javase/tutorial/sound/TOC.html[Java Sound Tutorial]
 * http://docs.oracle.com/javase/tutorial/sound/MIDI-messages.html[Transmitting and Receiving MIDI Messages]
 * https://docs.oracle.com/javase/8/docs/api/javax/sound/midi/package-summary.html[javax.sound.midi API]

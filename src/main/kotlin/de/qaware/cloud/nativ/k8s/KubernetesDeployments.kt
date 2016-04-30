@@ -62,6 +62,11 @@ open class KubernetesDeployments @Inject constructor(private val client: Kuberne
         operation.watch(this)
     }
 
+    open fun clear() {
+        deployments.clear()
+        names.clear()
+    }
+
     open fun deployments(): List<Deployment?> = deployments.toList()
 
     open operator fun get(row: Int): Deployment? = deployments[row]

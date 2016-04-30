@@ -45,9 +45,6 @@ fun main(args: Array<String>) {
     val cdiContainer = getCdiContainer()
     cdiContainer.boot();
 
-    // ensure we shutdown nicely on exit
-    Runtime.getRuntime().addShutdownHook(Thread() { cdiContainer.shutdown() })
-
     // and initialize the CDI container control
     val contextControl = cdiContainer.contextControl;
     contextControl.startContext(Dependent::class.java)
@@ -71,4 +68,7 @@ fun main(args: Array<String>) {
     } else {
         logger.warning("No Leap Motion support.")
     }
+
+    // ensure we shutdown nicely on exit
+    Runtime.getRuntime().addShutdownHook(Thread() { cdiContainer.shutdown() })
 }

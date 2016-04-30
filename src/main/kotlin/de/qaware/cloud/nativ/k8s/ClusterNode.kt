@@ -38,9 +38,15 @@ data class ClusterNode(val row: Int, val column: Int,
         return this
     }
 
+    fun update(p: Phase) {
+        if (active.get()) {
+            phase = p
+        }
+    }
+
     fun deactivate(): ClusterNode {
         active.compareAndSet(true, false)
-        phase = Phase.Unknown
+        phase = Phase.Terminated
         return this
     }
 

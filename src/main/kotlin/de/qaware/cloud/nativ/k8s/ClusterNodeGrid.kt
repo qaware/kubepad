@@ -30,6 +30,7 @@ import org.slf4j.Logger
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
+import javax.annotation.PreDestroy
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.event.Event
 import javax.enterprise.event.Observes
@@ -86,19 +87,27 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
         }
     }
 
+    @PreDestroy
+    open fun shutdown() {
+        deployments.clear()
+        grid.forEach { row ->
+            row.forEach { it.deactivate() }
+        }
+    }
+
     private fun watch(row: Int, labels: MutableMap<String, String>) {
         scheduler.scheduleWithFixedDelay({
             if (deployments.deployments()[row] == null ) {
                 throw IllegalStateException("No deployment at $row to watch.")
             }
 
-            val nodes = grid[row]
-            val active = nodes.filter { it.active.get() }
+            pods.all(labels).forEachIndexed { j, pod ->
+                val nodes = grid[row]
+                val active = nodes.filter { it.active.get() }
 
-            pods.all(labels).reversed().forEachIndexed { j, pod ->
                 val node = active.elementAtOrElse(j) { nodes[next(row)].activate() }
                 if (node.active.get()) {
-                    node.phase = phase(pod)
+                    node.update(phase(pod))
                     updateClusterNode(row, node)
                 }
             }
@@ -131,10 +140,8 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
         val node = grid[event.row][event.column]
         val running = grid[event.row].count { it.active.get() }
 
-        executor.execute({
-            updateClusterNode(event.row, node.activate())
-            deployments.scale(event.row, running + 1)
-        })
+        updateClusterNode(event.row, node.activate())
+        executor.execute { deployments.scale(event.row, running + 1) }
     }
 
     /**
@@ -148,12 +155,10 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
         val node = grid[event.row][event.column]
         val running = grid[event.row].count { it.active.get() }
 
-        executor.execute({
-            deployments.scale(event.row, running - 1)
-            stopping(event.row, node)
-            node.deactivate()
-            stopped(event.row, node)
-        })
+        stopping(event.row, node)
+        node.deactivate()
+        executor.execute { deployments.scale(event.row, running - 1) }
+        stopped(event.row, node)
     }
 
     /**

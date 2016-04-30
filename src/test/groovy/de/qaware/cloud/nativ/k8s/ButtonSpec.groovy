@@ -21,15 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.qaware.cloud.nativ.k8s.control
+package de.qaware.cloud.nativ.k8s
 
 import spock.lang.Specification
 
 import javax.sound.midi.Receiver
 import javax.sound.midi.ShortMessage
 
-import static de.qaware.cloud.nativ.k8s.control.LaunchpadMK2.Button.*
-import static de.qaware.cloud.nativ.k8s.control.LaunchpadMK2.Color.*
+import static de.qaware.cloud.nativ.k8s.LaunchpadMK2.Button.*
+import static de.qaware.cloud.nativ.k8s.LaunchpadMK2.Color.*
 
 /**
  * Simple Button spec to check basic receiver interaction.

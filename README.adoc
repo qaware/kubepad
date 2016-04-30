@@ -1,0 +1,40 @@
+= Kubepad
+
+image::kubepad-in-action.jpg[K8S Cloud Launchpad, 430, 430]
+
+== Usage
+
+First of all you need a Kubernetes cluster. You can access a local installation as
+well as a remote Kubernetes master. Make sure you have the proper configuration
+under `˜.kube/config`.
+
+Now you can start and use the Kubepad. Each row represents a Kubernetes deployment, with
+the square buttons representing pod instances. Running Pods are green, launching and
+pending Pods are yellow, and terminating pods are red. You can start and stop a Pod by
+directly pressing a square button. You can also select a row by pressing the buttons on
+the right hand side. The cursors at the top can also be used to select the row (up and down)
+and scale the row (left and right).
+
+You can also use a connected leap motion to control your Kubernetes cluster. Perform a swipe
+gesture to scale to 5 Pods (= 5 fingers). Use key tap or screen tap gestures to move the
+row selection down or up.
+
+== References
+
+* http://www.thomann.de/de/novation_launchpad_mk2.htm[Novation Launchpad MK2]
+* https://novationmusic.de/sites/default/files/novation/downloads/10529/launchpad-mk2-programmers-reference-guide_0.pdf[Launchpad MK2 Programmers Reference Guide]
+* http://de.slideshare.net/kubecon/kubecon-eu-2016-kubernetes-hardware-hacks-exploring-the-kubernetes-api-through-knobs-faders-and-sliders[KubeCon EU 2016: Kubernetes Hardware Hacks: Exploring the Kubernetes API Through Knobs, Faders, and Sliders]
+* https://github.com/fabric8io/fabric8/tree/master/components/kubernetes-api[Kubernetes API]
+* https://github.com/fabric8io/kubernetes-client[GitHub Kubernetes Client]
+* http://docs.oracle.com/javase/tutorial/sound/TOC.html[Java Sound Tutorial]
+* http://docs.oracle.com/javase/tutorial/sound/MIDI-messages.html[Transmitting and Receiving MIDI Messages]
+* https://docs.oracle.com/javase/8/docs/api/javax/sound/midi/package-summary.html[javax.sound.midi API]
+
+== Maintainer
+
+M.-Leander Reimer (@lreimer), <mario-leander.reimer@qaware.de>
+
+== License
+
+The software and documentation is provided under the MIT open source license,
+read the `LICENSE` file for details.

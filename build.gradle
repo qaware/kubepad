@@ -1,8 +1,8 @@
 buildscript {
     ext {
-        kotlinVersion = '1.0.1-2'
+        kotlinVersion = '1.0.2'
         slf4jVersion = '1.7.20'
-        spekVersion = '1.0.0'
+        spekVersion = '1.0.25'
     }
     repositories {
         jcenter()
@@ -58,8 +58,8 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
-    compile 'io.fabric8:kubernetes-api:2.2.101'
-    compile 'io.fabric8:kubernetes-client:1.3.78'
+    compile 'io.fabric8:kubernetes-api:2.2.126'
+    compile 'io.fabric8:kubernetes-client:1.3.95'
 
     compile ':LeapJava:2.3.1'
 

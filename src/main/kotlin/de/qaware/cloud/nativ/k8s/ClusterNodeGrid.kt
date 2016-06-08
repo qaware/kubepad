@@ -83,7 +83,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
             }
 
             // start watching the row
-            watch(row, labels)
+            // watch(row, labels)
         }
     }
 
@@ -205,7 +205,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
                     val node = nodes[it]
                     updateClusterNode(event.index, node.activate())
                 }
-                watch(event.index, event.labels)
+                // watch(event.index, event.labels)
             }
             ClusterDeploymentEvent.Type.DELETED -> {
                 IntRange(0, 7).forEach {

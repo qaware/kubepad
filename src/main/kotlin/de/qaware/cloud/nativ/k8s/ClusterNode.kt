@@ -34,7 +34,7 @@ data class ClusterNode(val row: Int, val column: Int,
 
     fun activate(): ClusterNode {
         active.compareAndSet(false, true)
-        phase = Phase.Pending
+        phase = Phase.Running
         return this
     }
 

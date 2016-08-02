@@ -24,6 +24,7 @@
 package de.qaware.cloud.nativ.k8s
 
 import io.fabric8.kubernetes.api.KubernetesHelper
+import io.fabric8.kubernetes.api.model.Cluster
 import io.fabric8.kubernetes.api.model.extensions.Deployment
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientException
@@ -43,7 +44,7 @@ open class KubernetesDeployments @Inject constructor(private val client: Kuberne
                                                      @ConfigProperty(name = "kubernetes.namespace")
                                                      private val namespace: String,
                                                      private val events: Event<ClusterDeploymentEvent>,
-                                                     private val logger: Logger) : Watcher<Deployment> {
+                                                     private val logger: Logger): Watcher<Deployment>, ClusterDeployments {
 
     private val deployments = mutableListOf<Deployment?>()
     private val names = mutableListOf<String?>()
@@ -62,14 +63,14 @@ open class KubernetesDeployments @Inject constructor(private val client: Kuberne
         operation.watch(this)
     }
 
-    open fun clear() {
+    override fun clear() {
         deployments.clear()
         names.clear()
     }
 
-    open fun deployments(): List<Deployment?> = deployments.toList()
+    override fun deployments(): List<Deployment?> = deployments.toList()
 
-    open operator fun get(row: Int): Deployment? = deployments[row]
+    override operator fun get(row: Int): Deployment? = deployments[row]
 
     /**
      * Scale the Kubernetes deployment to a number of given replicas.
@@ -77,7 +78,7 @@ open class KubernetesDeployments @Inject constructor(private val client: Kuberne
      * @param index the deployment index on the Launchpad
      * @param replicas the number of replicas
      */
-    open fun scale(index: Int, replicas: Int) {
+    override fun scale(index: Int, replicas: Int) {
         if (index > deployments.size) return
 
         var deployment = deployments[index]

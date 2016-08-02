@@ -58,6 +58,7 @@ fun main(args: Array<String>) {
     controller.write("K8S Cloud Launchpad")
     controller.init()
 
+    /*
     val logger = Logger.getLogger(LeapMotionController::class.java.name)
     val leap = getContextualReference(LeapMotionController::class.java)
     if (leap.enabled) {
@@ -68,6 +69,7 @@ fun main(args: Array<String>) {
     } else {
         logger.warning("No Leap Motion support.")
     }
+    */
 
     // ensure we shutdown nicely on exit
     Runtime.getRuntime().addShutdownHook(Thread() { cdiContainer.shutdown() })

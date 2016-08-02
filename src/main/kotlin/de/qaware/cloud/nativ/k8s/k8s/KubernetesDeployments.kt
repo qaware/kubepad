@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.qaware.cloud.nativ.k8s
+package de.qaware.cloud.nativ.k8s.k8s
 
+import de.qaware.cloud.nativ.k8s.cluster.ClusterDeploymentEvent
+import de.qaware.cloud.nativ.k8s.cluster.ClusterDeployments
 import io.fabric8.kubernetes.api.KubernetesHelper
-import io.fabric8.kubernetes.api.model.Cluster
 import io.fabric8.kubernetes.api.model.extensions.Deployment
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientException

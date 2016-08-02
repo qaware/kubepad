@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.qaware.cloud.nativ.k8s
+package de.qaware.cloud.nativ.k8s.logging
 
 import org.apache.deltaspike.core.api.exclude.Exclude
 import org.apache.deltaspike.core.api.projectstage.ProjectStage

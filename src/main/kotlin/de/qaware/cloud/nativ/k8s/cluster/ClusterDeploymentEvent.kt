@@ -21,20 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.qaware.cloud.nativ.k8s
-
-import org.slf4j.LoggerFactory
-import javax.enterprise.context.ApplicationScoped
-import javax.enterprise.context.Dependent
-import javax.enterprise.inject.Produces
-import javax.enterprise.inject.spi.InjectionPoint
+package de.qaware.cloud.nativ.k8s.cluster
 
 /**
- * The CDI logger producer to inject SLF4J loggers.
+ * An event data class for any cluster deployment events.
  */
-@ApplicationScoped
-class LoggerProducer {
-    @Produces
-    @Dependent
-    fun create(ij: InjectionPoint) = LoggerFactory.getLogger(ij.member.declaringClass)
+data class ClusterDeploymentEvent(val index: Int,
+                                  val replicas: Int,
+                                  val labels: MutableMap<String, String>,
+                                  val type: Type) {
+    enum class Type {
+        ADDED, SCALED_UP, SCALED_DOWN, DELETED
+    }
 }

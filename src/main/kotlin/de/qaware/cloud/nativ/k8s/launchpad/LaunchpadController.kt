@@ -21,12 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.qaware.cloud.nativ.k8s
+package de.qaware.cloud.nativ.k8s.launchpad
 
-import de.qaware.cloud.nativ.k8s.LaunchpadEvent.Switch
-import de.qaware.cloud.nativ.k8s.LaunchpadMK2.Button
-import de.qaware.cloud.nativ.k8s.LaunchpadMK2.Color.*
-import de.qaware.cloud.nativ.k8s.LaunchpadMK2.Square
+import de.qaware.cloud.nativ.k8s.cluster.ClusterNodeEvent
+import de.qaware.cloud.nativ.k8s.cluster.ClusterNodeGrid
+import de.qaware.cloud.nativ.k8s.launchpad.LaunchpadEvent.Switch
+import de.qaware.cloud.nativ.k8s.launchpad.LaunchpadMK2.Button
+import de.qaware.cloud.nativ.k8s.launchpad.LaunchpadMK2.Color.*
+import de.qaware.cloud.nativ.k8s.launchpad.LaunchpadMK2.Square
 import org.slf4j.Logger
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.event.Event
@@ -329,7 +331,7 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
         launchpad.select(object : AnnotationLiteral<LaunchpadEvent.Blink>() {}).fire(event)
     }
 
-    private fun light(switch: Switch, switchable: LaunchpadMK2.Switchable, color: LaunchpadMK2.Color = LaunchpadMK2.Color.NONE) {
+    private fun light(switch: Switch, switchable: LaunchpadMK2.Switchable, color: LaunchpadMK2.Color = NONE) {
         val event = LaunchpadEvent.light(switch, switchable, color)
         launchpad.select(object : AnnotationLiteral<LaunchpadEvent.Light>() {}).fire(event)
     }

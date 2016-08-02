@@ -21,25 +21,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.qaware.cloud.nativ.k8s
+package de.qaware.cloud.nativ.k8s.cluster
 
-import javax.inject.Qualifier
-import kotlin.annotation.AnnotationRetention.RUNTIME
-import kotlin.annotation.AnnotationTarget.*
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * The event data class for switchable button events.
+ * The data class to represent one node instance on the grid.
  */
-data class SwitchableEvent(val switchable: LaunchpadMK2.Switchable?) {
+data class ClusterNode(val row: Int, val column: Int,
+                       var phase: Phase = ClusterNode.Phase.Unknown,
+                       val active: AtomicBoolean = AtomicBoolean(false)) {
 
-    @Qualifier
-    @Target(TYPE, FUNCTION, VALUE_PARAMETER, FIELD)
-    @Retention(RUNTIME)
-    annotation class Released
+    fun activate(): ClusterNode {
+        active.compareAndSet(false, true)
+        phase = Phase.Running
+        return this
+    }
 
-    @Qualifier
-    @Target(TYPE, FUNCTION, VALUE_PARAMETER, FIELD)
-    @Retention(RUNTIME)
-    annotation class Pressed
+    fun update(p: Phase) {
+        if (active.get()) {
+            phase = p
+        }
+    }
+
+    fun deactivate(): ClusterNode {
+        active.compareAndSet(true, false)
+        phase = Phase.Terminated
+        return this
+    }
+
+    enum class Phase {
+        Pending, Running, Terminated, Succeeded, Failed, Unknown
+    }
 
 }

@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.qaware.cloud.nativ.k8s
+package de.qaware.cloud.nativ.k8s.launchpad
 
-import de.qaware.cloud.nativ.k8s.LaunchpadEvent.Switch.ON
+import de.qaware.cloud.nativ.k8s.launchpad.LaunchpadEvent.Switch.ON
 import org.slf4j.Logger
 import java.nio.charset.Charset
 import java.util.*

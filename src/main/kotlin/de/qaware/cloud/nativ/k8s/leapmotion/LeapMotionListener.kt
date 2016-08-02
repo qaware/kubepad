@@ -21,9 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.qaware.cloud.nativ.k8s
+package de.qaware.cloud.nativ.k8s.leapmotion
 
 import com.leapmotion.leap.*
+import de.qaware.cloud.nativ.k8s.launchpad.LaunchpadController
 import org.slf4j.Logger
 import kotlin.reflect.KProperty
 

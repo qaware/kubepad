@@ -21,27 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.qaware.cloud.nativ.k8s
+package de.qaware.cloud.nativ.k8s.logging
 
-import io.fabric8.kubernetes.client.Config
-import io.fabric8.kubernetes.client.ConfigBuilder
-import io.fabric8.kubernetes.client.DefaultKubernetesClient
-import io.fabric8.kubernetes.client.KubernetesClient
+import org.apache.deltaspike.core.api.exclude.Exclude
+import org.apache.deltaspike.core.api.projectstage.ProjectStage
+import org.slf4j.Logger
 import javax.enterprise.context.ApplicationScoped
-import javax.enterprise.inject.Default
-import javax.enterprise.inject.Produces
+import javax.enterprise.inject.Alternative
+import javax.inject.Inject
+import javax.sound.midi.Receiver
+import javax.sound.midi.Transmitter
 
 /**
- * The CDI producer for the Kubernetes Java API.
+ * An alternative MIDI transmitter implementation.
  */
 @ApplicationScoped
-open class KubernetesProducer {
+@Alternative
+@Exclude(exceptIfProjectStage = arrayOf(ProjectStage.Development::class))
+open class LoggingTransmitter @Inject constructor(private val logger: Logger) : Transmitter {
 
-    @Produces
-    @Default
-    open fun kubernetesClient(): KubernetesClient {
-        System.setProperty(Config.KUBERNETES_TRUST_CERT_SYSTEM_PROPERTY, "true")
-        val config = ConfigBuilder().build()
-        return DefaultKubernetesClient(config)
+    private var receiver: Receiver? = null
+
+    override fun getReceiver(): Receiver? {
+        return this.receiver
+    }
+
+    override fun setReceiver(receiver: Receiver?) {
+        this.receiver = receiver
+    }
+
+    override fun close() {
+        logger.debug("Closing transmitter.")
     }
 }

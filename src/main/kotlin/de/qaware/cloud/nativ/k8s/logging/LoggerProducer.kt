@@ -21,17 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.qaware.cloud.nativ.k8s
+package de.qaware.cloud.nativ.k8s.logging
 
-import org.apache.deltaspike.core.api.config.PropertyFileConfig
+import org.slf4j.LoggerFactory
 import javax.enterprise.context.ApplicationScoped
+import javax.enterprise.context.Dependent
+import javax.enterprise.inject.Produces
+import javax.enterprise.inject.spi.InjectionPoint
 
 /**
- * The DeltaSpike configuration property file.
+ * The CDI logger producer to inject SLF4J loggers.
  */
 @ApplicationScoped
-open class KubernetesConfig : PropertyFileConfig {
-    override fun getPropertyFileName(): String? = "kubernetes.properties"
-
-    override fun isOptional(): Boolean = false;
+class LoggerProducer {
+    @Produces
+    @Dependent
+    fun create(ij: InjectionPoint) = LoggerFactory.getLogger(ij.member.declaringClass)
 }

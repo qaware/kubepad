@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.qaware.cloud.nativ.k8s
+package de.qaware.cloud.nativ.k8s.launchpad
 
-import de.qaware.cloud.nativ.k8s.LaunchpadMK2.Color
+import de.qaware.cloud.nativ.k8s.launchpad.LaunchpadMK2.Color
 import javax.inject.Qualifier
 
 /**
@@ -32,11 +32,11 @@ import javax.inject.Qualifier
 data class LaunchpadEvent constructor(val switch: Switch?,
                                       val switchable: LaunchpadMK2.Switchable?,
                                       val text: String?,
-                                      val color: LaunchpadMK2.Color) {
+                                      val color: Color) {
 
-    constructor(switch: Switch, switchable: LaunchpadMK2.Switchable?, color: LaunchpadMK2.Color = Color.NONE) : this(switch, switchable, null, color)
+    constructor(switch: Switch, switchable: LaunchpadMK2.Switchable?, color: Color = Color.NONE) : this(switch, switchable, null, color)
 
-    constructor(text: String, color: LaunchpadMK2.Color) : this(null, null, text, color)
+    constructor(text: String, color: Color) : this(null, null, text, color)
 
     /**
      * Switch ON or OFF.
@@ -69,11 +69,11 @@ data class LaunchpadEvent constructor(val switch: Switch?,
         /**
          * Factory method for light events.
          */
-        fun light(switch: Switch, switchable: LaunchpadMK2.Switchable?, color: LaunchpadMK2.Color = Color.NONE) = LaunchpadEvent(switch, switchable, color)
+        fun light(switch: Switch, switchable: LaunchpadMK2.Switchable?, color: Color = Color.NONE) = LaunchpadEvent(switch, switchable, color)
 
         /**
          * Factory method for text events.
          */
-        fun text(message: String, color: LaunchpadMK2.Color) = LaunchpadEvent(message, color)
+        fun text(message: String, color: Color) = LaunchpadEvent(message, color)
     }
 }

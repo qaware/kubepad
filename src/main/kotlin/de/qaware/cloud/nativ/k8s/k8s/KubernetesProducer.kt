@@ -21,16 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.qaware.cloud.nativ.k8s
+package de.qaware.cloud.nativ.k8s.k8s
+
+import io.fabric8.kubernetes.client.Config
+import io.fabric8.kubernetes.client.ConfigBuilder
+import io.fabric8.kubernetes.client.DefaultKubernetesClient
+import io.fabric8.kubernetes.client.KubernetesClient
+import javax.enterprise.context.ApplicationScoped
+import javax.enterprise.inject.Default
+import javax.enterprise.inject.Produces
 
 /**
- * An event data class for any cluster deployment events.
+ * The CDI producer for the Kubernetes Java API.
  */
-data class ClusterDeploymentEvent(val index: Int,
-                                  val replicas: Int,
-                                  val labels: MutableMap<String, String>,
-                                  val type: Type) {
-    enum class Type {
-        ADDED, SCALED_UP, SCALED_DOWN, DELETED
+@ApplicationScoped
+open class KubernetesProducer {
+
+    @Produces
+    @Default
+    open fun kubernetesClient(): KubernetesClient {
+        System.setProperty(Config.KUBERNETES_TRUST_CERT_SYSTEM_PROPERTY, "true")
+        val config = ConfigBuilder().build()
+        return DefaultKubernetesClient(config)
     }
 }

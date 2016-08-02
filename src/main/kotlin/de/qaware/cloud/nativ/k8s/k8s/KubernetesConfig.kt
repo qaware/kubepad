@@ -21,37 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.qaware.cloud.nativ.k8s
+package de.qaware.cloud.nativ.k8s.k8s
 
-import java.util.concurrent.atomic.AtomicBoolean
+import org.apache.deltaspike.core.api.config.PropertyFileConfig
+import javax.enterprise.context.ApplicationScoped
 
 /**
- * The data class to represent one node instance on the grid.
+ * The DeltaSpike configuration property file.
  */
-data class ClusterNode(val row: Int, val column: Int,
-                       var phase: Phase = ClusterNode.Phase.Unknown,
-                       val active: AtomicBoolean = AtomicBoolean(false)) {
+@ApplicationScoped
+open class KubernetesConfig : PropertyFileConfig {
+    override fun getPropertyFileName(): String? = "kubernetes.properties"
 
-    fun activate(): ClusterNode {
-        active.compareAndSet(false, true)
-        phase = Phase.Running
-        return this
-    }
-
-    fun update(p: Phase) {
-        if (active.get()) {
-            phase = p
-        }
-    }
-
-    fun deactivate(): ClusterNode {
-        active.compareAndSet(true, false)
-        phase = Phase.Terminated
-        return this
-    }
-
-    enum class Phase {
-        Pending, Running, Terminated, Succeeded, Failed, Unknown
-    }
-
+    override fun isOptional(): Boolean = false;
 }

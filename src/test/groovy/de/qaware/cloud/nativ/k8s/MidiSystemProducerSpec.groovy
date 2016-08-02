@@ -23,6 +23,7 @@
  */
 package de.qaware.cloud.nativ.k8s
 
+import de.qaware.cloud.nativ.k8s.launchpad.MidiSystemProducer
 import spock.lang.Specification
 
 import javax.sound.midi.Receiver

@@ -25,6 +25,7 @@ package de.qaware.cloud.nativ.k8s
 
 import org.jetbrains.spek.api.Spek
 import kotlin.test.assertEquals
+import de.qaware.cloud.nativ.k8s.launchpad.LaunchpadMK2
 
 /**
  * A Kotlin Spek test for the round Button enum.

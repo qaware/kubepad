@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.qaware.cloud.nativ.k8s
+package de.qaware.cloud.nativ.k8s.leapmotion
 
 import com.leapmotion.leap.Controller
 import com.leapmotion.leap.Gesture
+import de.qaware.cloud.nativ.k8s.launchpad.LaunchpadController
 import org.slf4j.Logger
 import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy

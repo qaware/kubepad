@@ -25,10 +25,11 @@
 
 package de.qaware.cloud.nativ.k8s
 
+import de.qaware.cloud.nativ.k8s.launchpad.LaunchpadController
+import de.qaware.cloud.nativ.k8s.launchpad.LaunchpadMK2
 import org.apache.deltaspike.cdise.api.CdiContainerLoader.getCdiContainer
 import org.apache.deltaspike.core.api.provider.BeanProvider.getContextualReference
 import org.slf4j.bridge.SLF4JBridgeHandler
-import java.util.logging.Logger
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.context.Dependent
 

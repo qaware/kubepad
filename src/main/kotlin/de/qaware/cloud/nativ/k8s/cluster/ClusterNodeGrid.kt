@@ -21,11 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.qaware.cloud.nativ.k8s
+package de.qaware.cloud.nativ.k8s.cluster
 
-import de.qaware.cloud.nativ.k8s.KubernetesDeployments.Companion.labels
-import de.qaware.cloud.nativ.k8s.KubernetesPods.Companion.name
-import de.qaware.cloud.nativ.k8s.KubernetesPods.Companion.phase
+import de.qaware.cloud.nativ.k8s.k8s.KubernetesDeployments
+import de.qaware.cloud.nativ.k8s.k8s.KubernetesDeployments.Companion.labels
+import de.qaware.cloud.nativ.k8s.k8s.KubernetesPods
+import de.qaware.cloud.nativ.k8s.k8s.KubernetesPods.Companion.name
+import de.qaware.cloud.nativ.k8s.k8s.KubernetesPods.Companion.phase
 import org.slf4j.Logger
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.ScheduledExecutorService

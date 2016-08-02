@@ -28,8 +28,8 @@ import spock.lang.Specification
 import javax.sound.midi.Receiver
 import javax.sound.midi.ShortMessage
 
-import static de.qaware.cloud.nativ.k8s.LaunchpadMK2.Button.*
-import static de.qaware.cloud.nativ.k8s.LaunchpadMK2.Color.*
+import static LaunchpadMK2.Button.*
+import static LaunchpadMK2.Color.*
 
 /**
  * Simple Button spec to check basic receiver interaction.

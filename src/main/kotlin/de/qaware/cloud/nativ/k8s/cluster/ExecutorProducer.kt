@@ -21,36 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.qaware.cloud.nativ.k8s
+package de.qaware.cloud.nativ.k8s.cluster
 
-import org.apache.deltaspike.core.api.exclude.Exclude
-import org.apache.deltaspike.core.api.projectstage.ProjectStage
-import org.slf4j.Logger
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
 import javax.enterprise.context.ApplicationScoped
-import javax.enterprise.inject.Alternative
-import javax.inject.Inject
-import javax.sound.midi.Receiver
-import javax.sound.midi.Transmitter
+import javax.enterprise.inject.Any
+import javax.enterprise.inject.Disposes
+import javax.enterprise.inject.Produces
+import javax.inject.Named
 
 /**
- * An alternative MIDI transmitter implementation.
+ * A CDI producer bean for different executor service instances.
  */
 @ApplicationScoped
-@Alternative
-@Exclude(exceptIfProjectStage = arrayOf(ProjectStage.Development::class))
-open class LoggingTransmitter @Inject constructor(private val logger: Logger) : Transmitter {
+class ExecutorProducer {
 
-    private var receiver: Receiver? = null
+    @Produces
+    @Named("default")
+    fun executor(): ExecutorService = Executors.newFixedThreadPool(2)
 
-    override fun getReceiver(): Receiver? {
-        return this.receiver
-    }
+    @Produces
+    @Named("scheduled")
+    fun scheduled(): ScheduledExecutorService = Executors.newScheduledThreadPool(2)
 
-    override fun setReceiver(receiver: Receiver?) {
-        this.receiver = receiver
-    }
-
-    override fun close() {
-        logger.debug("Closing transmitter.")
-    }
+    fun shutdown(@Disposes @Any executorService: ExecutorService) = executorService.shutdown()
 }

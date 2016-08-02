@@ -21,30 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.qaware.cloud.nativ.k8s
+package de.qaware.cloud.nativ.k8s.launchpad
 
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
-import javax.enterprise.context.ApplicationScoped
-import javax.enterprise.inject.Any
-import javax.enterprise.inject.Disposes
-import javax.enterprise.inject.Produces
-import javax.inject.Named
+import javax.inject.Qualifier
+import kotlin.annotation.AnnotationRetention.RUNTIME
+import kotlin.annotation.AnnotationTarget.*
 
 /**
- * A CDI producer bean for different executor service instances.
+ * The event data class for switchable button events.
  */
-@ApplicationScoped
-class ExecutorProducer {
+data class SwitchableEvent(val switchable: LaunchpadMK2.Switchable?) {
 
-    @Produces
-    @Named("default")
-    fun executor(): ExecutorService = Executors.newFixedThreadPool(2)
+    @Qualifier
+    @Target(TYPE, FUNCTION, VALUE_PARAMETER, FIELD)
+    @Retention(RUNTIME)
+    annotation class Released
 
-    @Produces
-    @Named("scheduled")
-    fun scheduled(): ScheduledExecutorService = Executors.newScheduledThreadPool(2)
+    @Qualifier
+    @Target(TYPE, FUNCTION, VALUE_PARAMETER, FIELD)
+    @Retention(RUNTIME)
+    annotation class Pressed
 
-    fun shutdown(@Disposes @Any executorService: ExecutorService) = executorService.shutdown()
 }

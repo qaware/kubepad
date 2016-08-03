@@ -9,8 +9,8 @@
     <!-- -Dorg.apache.deltaspike.ProjectStage=Development -->
     <!--
     <alternatives>
-        <class>de.qaware.cloud.nativ.k8s.control.LoggingReceiver</class>
-        <class>de.qaware.cloud.nativ.k8s.control.LoggingTransmitter</class>
+        <class>de.qaware.cloud.nativ.kpad.logging.LoggingReceiver</class>
+        <class>de.qaware.cloud.nativ.kpad.logging.LoggingTransmitter</class>
     </alternatives>
     -->
 

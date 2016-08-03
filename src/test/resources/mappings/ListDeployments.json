@@ -1,0 +1,26 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/v2/deployments"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": [
+      {
+        "id": "testapp-d0",
+        "affectedApps": [
+          "testapp"
+        ],
+        "currentActions": [
+          {
+            "action": "ScaleApplication",
+            "app": "testapp"
+          }
+        ]
+      }
+    ],
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

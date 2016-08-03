@@ -1,0 +1,27 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/v2/apps?embed=apps.deployments"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "apps": [
+        {
+          "id": "testapp",
+          "cmd": "testcmd",
+          "instances": 3,
+          "cpus": 0.1,
+          "deployments": [
+            {
+              "id": "testapp-d0"
+            }
+          ]
+        }
+      ]
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

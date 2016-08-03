@@ -1,0 +1,15 @@
+{
+  "request": {
+    "method": "PUT",
+    "url": "/v2/apps/testapp"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "deploymentId": "testapp-d0"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

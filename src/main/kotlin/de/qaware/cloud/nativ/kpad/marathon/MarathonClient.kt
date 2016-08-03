@@ -35,7 +35,7 @@ import javax.enterprise.context.ApplicationScoped
 @ApplicationScoped
 interface MarathonClient {
 
-    @GET("v2/apps")
+    @GET("v2/apps?embed=apps.deployments")
     fun listApps() : Call<Apps>
 
     @PUT("v2/apps/{app_id}")
@@ -57,7 +57,7 @@ interface MarathonClient {
 
     data class Deployment(
             val id : String,
-            val affectedApps : List<App>,
+            val affectedApps : List<String>,
             val currentActions : List<Action>
     )
 

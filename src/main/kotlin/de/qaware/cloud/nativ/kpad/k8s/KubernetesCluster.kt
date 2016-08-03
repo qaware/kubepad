@@ -95,20 +95,20 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
     /**
      * Scale the Kubernetes deployment to a number of given replicas.
      *
-     * @param index the deployment index on the Launchpad
+     * @param appIndex the deployment index on the Launchpad
      * @param replicas the number of replicas
      */
-    override fun scale(index: Int, replicas: Int) {
-        if (index > deployments.size) return
+    override fun scale(appIndex: Int, replicas: Int) {
+        if (appIndex > deployments.size) return
 
-        var deployment = deployments[index]
+        var deployment = deployments[appIndex]
         val name = KubernetesHelper.getName(deployment)
 
         logger.debug("Scaling deployment {} to {} replicas.",
                 KubernetesHelper.getName(deployment), replicas)
 
         synchronized(client) {
-            deployments[index] = client.extensions().deployments().inNamespace(namespace).withName(name)
+            deployments[appIndex] = client.extensions().deployments().inNamespace(namespace).withName(name)
                     .edit().editSpec()
                     .withReplicas(replicas)
                     .endSpec().done()

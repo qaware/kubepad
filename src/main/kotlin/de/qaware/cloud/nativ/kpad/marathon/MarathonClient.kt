@@ -29,6 +29,9 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 import javax.enterprise.context.ApplicationScoped
 
+/**
+ * @see <a href="https://mesosphere.github.io/marathon/docs/generated/api.html">Marathon REST API documentation</a>
+ */
 @ApplicationScoped
 interface MarathonClient {
 

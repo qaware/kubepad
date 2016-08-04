@@ -37,9 +37,12 @@ class MarathonClientTest {
     val wireMockRule = WireMockRule(8089)
 
     @Test
-    fun marathonTest() {
+    fun listAppsTest() {
         val apps = client.listApps().execute().body().apps
+        apps.forEach { println("Found Marathon app with id ${it.id}") }
+
         val deployments = client.listDeployments().execute().body()
+        deployments.forEach { println("Found Marathon deployment with id ${it.id}") }
 
         val appsWithDeployments = apps.map { app -> app.copy(deployments = deployments.filter {
             dep -> app.deployments.any { it.id.equals(dep.id) } }) }
@@ -49,6 +52,17 @@ class MarathonClientTest {
         }
 
         assertEquals(appsWithDeployments.first(), testApp,
+                "The parsed data received from the testing api does not match the test object")
+    }
+
+    @Test
+    fun updateAppTest() {
+        println("Scaling app ${testApp.id} to 4 instances")
+        val result = client.updateApp(testApp.id, MarathonClient.ScalingUpdate(4)).execute().body()
+        val deployment = client.listDeployments().execute().body().findLast { it.id.equals(result.deploymentId) }
+        println("Scaling successful. Created depolyment ${deployment}")
+
+        assertEquals(deployment, testApp.deployments.first(),
                 "The parsed data received from the testing api does not match the test object")
     }
 }

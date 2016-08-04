@@ -24,9 +24,9 @@
 package de.qaware.cloud.nativ.kpad.k8s
 
 import de.qaware.cloud.nativ.kpad.Cluster
+import de.qaware.cloud.nativ.kpad.ClusterAppReplica
 import de.qaware.cloud.nativ.kpad.ClusterDeploymentEvent
 import de.qaware.cloud.nativ.kpad.ClusterNode
-import de.qaware.cloud.nativ.kpad.ClusterAppReplica
 import io.fabric8.kubernetes.api.KubernetesHelper
 import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.api.model.extensions.Deployment
@@ -34,16 +34,17 @@ import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientException
 import io.fabric8.kubernetes.client.Watcher
 import org.apache.deltaspike.core.api.config.ConfigProperty
+import org.apache.deltaspike.core.api.exclude.Exclude
 import org.slf4j.Logger
 import javax.annotation.PostConstruct
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.event.Event
-import javax.enterprise.inject.Alternative
 import javax.inject.Inject
 
 /**
  * This class handles the Deployments on Kubernetes.
  */
+@Exclude(onExpression="cluster.service!=kubernetes")
 @ApplicationScoped
 open class KubernetesCluster @Inject constructor(private val client: KubernetesClient,
                                                  @ConfigProperty(name = "kubernetes.namespace")

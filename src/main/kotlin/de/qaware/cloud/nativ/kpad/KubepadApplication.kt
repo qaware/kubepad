@@ -34,7 +34,9 @@ import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.context.Dependent
 
 /**
- * The main application class for the K8S Cloud Launchpad.
+ * The main application class for the Cloud Launchpad.
+ * K8S and Marathon (DC/OS) are supported.
+ * To switch between them set -Dcluster.service to either kubernetes or marathon.
  *
  * -Djava.library.path=.:./lib
  */
@@ -46,9 +48,15 @@ fun main(args: Array<String>) {
     System.setProperty("javax.sound.midi.Transmitter", "com.sun.media.sound.MidiInDeviceProvider#Launchpad MK2");
     System.setProperty("javax.sound.midi.Receiver", "com.sun.media.sound.MidiOutDeviceProvider#Launchpad MK2");
 
+    var clusterService = System.getProperty("cluster.service")
+    if(clusterService == null) {
+        System.setProperty("cluster.service", "kubernetes")
+        clusterService = "kubernetes"
+    }
+
     // get the current CDI container
     val cdiContainer = getCdiContainer()
-    cdiContainer.boot();
+    cdiContainer.boot()
 
     // and initialize the CDI container control
     val contextControl = cdiContainer.contextControl;
@@ -60,7 +68,7 @@ fun main(args: Array<String>) {
     launchpad.reset()
 
     val controller = getContextualReference(LaunchpadController::class.java)
-    controller.write("K8S Cloud Launchpad")
+    controller.write(clusterService)
     controller.init()
 
     /*

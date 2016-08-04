@@ -23,23 +23,24 @@
  */
 package de.qaware.cloud.nativ.kpad.marathon
 
-import org.apache.deltaspike.core.api.config.ConfigResolver
+import org.apache.deltaspike.core.api.config.ConfigProperty
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.inject.Default
 import javax.enterprise.inject.Produces
+import javax.inject.Inject
 
 /**
  * The CDI producer for the Marathon Java API.
  */
 @ApplicationScoped
-open class MarathonProducer {
+open class MarathonProducer @Inject constructor(@ConfigProperty(name = "marathon.apiEndpoint")
+                                                private val apiEndpoint: String) {
 
     @Produces
     @Default
     open fun marathonClient() : MarathonClient {
-        val apiEndpoint = ConfigResolver.getPropertyValue("DCOS_API_ENDPOINT")
         val retrofit = Retrofit.Builder()
                 .baseUrl(apiEndpoint)
                 .addConverterFactory(GsonConverterFactory.create())

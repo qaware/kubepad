@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.qaware.cloud.nativ.kpad.k8s
+package de.qaware.cloud.nativ.kpad
 
 import org.apache.deltaspike.core.api.config.PropertyFileConfig
 import javax.enterprise.context.ApplicationScoped
@@ -30,8 +30,8 @@ import javax.enterprise.context.ApplicationScoped
  * The DeltaSpike configuration property file.
  */
 @ApplicationScoped
-open class KubernetesConfig : PropertyFileConfig {
-    override fun getPropertyFileName(): String? = "kubernetes.properties"
+open class ClusterConfig : PropertyFileConfig {
+    override fun getPropertyFileName(): String? = "cluster.properties"
 
     override fun isOptional(): Boolean = false;
 }

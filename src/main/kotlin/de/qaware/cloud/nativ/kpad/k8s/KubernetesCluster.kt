@@ -79,9 +79,16 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
 
     override fun appExists(appIndex: Int) = deployments[appIndex] != null
 
+    override fun labels(appIndex: Int) : Map<String, String> {
+        return labels(deployments[appIndex])
+    }
+
+    private fun labels(deployment : Deployment?) : Map<String, String> {
+        return KubernetesHelper.getLabels(deployment)
+    }
+
     override fun replicas(appIndex: Int): List<ClusterAppReplica> {
-        val deployment = deployments[appIndex]
-        val labels = KubernetesHelper.getLabels(deployment)
+        val labels = labels(appIndex)
         val pods = client.pods().inNamespace(namespace).withLabels(labels).list()?.items ?: emptyList()
         return pods.map {pod -> replica(pod)}
     }
@@ -102,7 +109,7 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
     override fun scale(appIndex: Int, replicas: Int) {
         if (appIndex > deployments.size) return
 
-        var deployment = deployments[appIndex]
+        val deployment = deployments[appIndex]
         val name = KubernetesHelper.getName(deployment)
 
         logger.debug("Scaling deployment {} to {} replicas.",
@@ -172,15 +179,5 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
     }
 
     override fun onClose(cause: KubernetesClientException?) {
-    }
-
-    companion object {
-        /**
-         * Helper method to extract the labels from the given Deployment.
-         *
-         * @param deployment a Kubernetes deployment
-         * @return a map of labels
-         */
-        fun labels(deployment: Deployment?): MutableMap<String, String> = KubernetesHelper.getLabels(deployment)
     }
 }

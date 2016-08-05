@@ -28,7 +28,7 @@ package de.qaware.cloud.nativ.kpad
  */
 data class ClusterDeploymentEvent(val index: Int,
                                   val replicas: Int,
-                                  val labels: MutableMap<String, String>,
+                                  val labels: Map<String, String>,
                                   val type: Type) {
     enum class Type {
         ADDED, SCALED_UP, SCALED_DOWN, DELETED

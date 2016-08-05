@@ -76,7 +76,7 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
                 }
             } else { // app not found in newApps -> deleted
                 logger.debug("Deleted deployment {}.", apps[i]!!.id)
-                apps[i] = null;
+                apps[i] = null
                 events.fire(ClusterDeploymentEvent(i, 0, labels(i), ClusterDeploymentEvent.Type.DELETED))
             }
         }
@@ -99,12 +99,12 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
     override fun appExists(appIndex: Int): Boolean = appIndex < apps.count()
 
     override fun replicas(appIndex: Int): List<ClusterAppReplica> {
-        val app = apps[appIndex]!!
-        val instances = mutableListOf<ClusterAppReplica>();
-        for(i in 0.until(app.instances)) {
+        val app = apps[appIndex]
+        val instances = mutableListOf<ClusterAppReplica>()
+        for(i in 0.until(app?.instances ?: 0)) {
             instances.add(object : ClusterAppReplica {
                 override fun phase() : ClusterNode.Phase = ClusterNode.Phase.Running
-                override fun name() : String = app.id + "-instance" + i;
+                override fun name() : String = app!!.id + "-instance" + i
             })
         }
         return instances
@@ -124,8 +124,8 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
         deployments.add(deployment)
     }
 
-    private fun labels(appIndex: Int) : MutableMap<String, String> {
-        return mutableMapOf<String, String>()
+    override fun labels(appIndex: Int) : Map<String, String> {
+        return apps[appIndex]?.labels ?: emptyMap()
     }
 
     override fun clear() {

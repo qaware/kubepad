@@ -43,13 +43,21 @@ interface Cluster {
     /**
      * Retrieves the list of all replicas of the app at the given index. Each of the replicas is represented by one
      * square on the launchpad.
+     * If the specified app does not exist a empty list will be returned.
      */
     fun replicas(appIndex : Int) : List<ClusterAppReplica>
 
     /**
+     * Each app can be annotated with additional information in the form of labels which are stored as key-value pairs.
+     * If the specified app does not exist a empty map will be returned.
+     * @return A map of label keys and their values.
+     */
+    fun labels(appIndex : Int) : Map<String, String>
+
+    /**
      * Scale the app at the given index to a number of given replicas.
      *
-     * @param index the deployment index on the Launchpad
+     * @param appIndex the deployment index on the Launchpad
      * @param replicas the number of replicas
      */
     fun scale(appIndex : Int, replicas : Int)

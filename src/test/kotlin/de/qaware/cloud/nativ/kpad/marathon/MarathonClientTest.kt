@@ -31,9 +31,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 import kotlin.test.assertEquals
 
 class MarathonClientTest {
+    val port = 8089
 
     val retrofit = Retrofit.Builder()
-            .baseUrl("http://localhost:8089")
+            .baseUrl("http://localhost:$port")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     val client = retrofit.create(MarathonClient::class.java)
@@ -53,11 +54,12 @@ class MarathonClientTest {
                                     )
                             )
                     )
-            )
+            ),
+            labels = mapOf(Pair("key", "value"))
     )
 
     @Rule @JvmField
-    val wireMockRule = WireMockRule(8089)
+    val wireMockRule = WireMockRule(port)
 
     @Test
     fun listAppsTest() {

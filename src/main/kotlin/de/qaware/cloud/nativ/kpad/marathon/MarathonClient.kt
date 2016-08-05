@@ -49,7 +49,8 @@ interface MarathonClient {
             val id : String,
             val cmd : String,
             val instances : Int,
-            val deployments : List<Deployment>
+            val deployments : List<Deployment>,
+            val labels: Map<String, String>
     )
 
     data class Apps(val apps : List<App>)

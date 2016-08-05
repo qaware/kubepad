@@ -16,7 +16,10 @@
             {
               "id": "testapp-d0"
             }
-          ]
+          ],
+          "labels": {
+            "key": "value"
+          }
         }
       ]
     },

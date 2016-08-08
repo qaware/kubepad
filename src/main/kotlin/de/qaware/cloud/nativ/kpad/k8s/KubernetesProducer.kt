@@ -27,20 +27,24 @@ import io.fabric8.kubernetes.client.Config
 import io.fabric8.kubernetes.client.ConfigBuilder
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClient
+import org.apache.deltaspike.core.api.config.ConfigProperty
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.inject.Default
 import javax.enterprise.inject.Produces
+import javax.inject.Inject
 
 /**
  * The CDI producer for the Kubernetes Java API.
  */
 @ApplicationScoped
-open class KubernetesProducer {
+open class KubernetesProducer @Inject constructor(@ConfigProperty(name = "kubernetes.master")
+                                                  private val master: String) {
 
     @Produces
     @Default
     open fun kubernetesClient(): KubernetesClient {
         System.setProperty(Config.KUBERNETES_TRUST_CERT_SYSTEM_PROPERTY, "true")
+        System.setProperty(Config.KUBERNETES_MASTER_SYSTEM_PROPERTY, master)
         val config = ConfigBuilder().build()
         return DefaultKubernetesClient(config)
     }

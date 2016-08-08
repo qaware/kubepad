@@ -23,9 +23,12 @@
  */
 package de.qaware.cloud.nativ.kpad.marathon
 
+import com.google.common.io.Files
+import okhttp3.OkHttpClient
 import org.apache.deltaspike.core.api.config.ConfigProperty
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.inject.Default
 import javax.enterprise.inject.Produces
@@ -36,15 +39,44 @@ import javax.inject.Inject
  */
 @ApplicationScoped
 open class MarathonProducer @Inject constructor(@ConfigProperty(name = "marathon.apiEndpoint")
-                                                private val apiEndpoint: String) {
+                                                private val apiEndpoint: String,
+                                                @ConfigProperty(name = "marathon.accessTokenFile")
+                                                private val accessTokenFile: String) {
+
+    /*
+    var wireMockServer : WireMockServer? = null
+
+    @PostConstruct
+    fun init() {
+        wireMockServer = WireMockServer()
+        wireMockServer!!.start()
+    }
+
+    @PreDestroy
+    fun stop() {
+        wireMockServer!!.stop()
+    }
+    */
 
     @Produces
     @Default
     open fun marathonClient() : MarathonClient {
+        val accessToken = Files.toString(File(accessTokenFile), Charsets.UTF_8)
+
+        val client = OkHttpClient.Builder()
+                .addInterceptor { chain ->
+                    val req = chain.request().newBuilder()
+                            .header("Authorization", "token=$accessToken")
+                            .build()
+                    chain.proceed(req)
+                }.build()
+
         val retrofit = Retrofit.Builder()
                 .baseUrl(apiEndpoint)
                 .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
                 .build()
+
         return retrofit.create(MarathonClient::class.java)
     }
 

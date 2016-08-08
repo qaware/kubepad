@@ -46,6 +46,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
                                                private val events: Event<ClusterNodeEvent>,
                                                private val cluster: Cluster,
                                                private val logger: Logger) {
+    private var initialized : Boolean = false
 
     private val grid = arrayOf(
             mutableListOf<ClusterNode>(), mutableListOf<ClusterNode>(),
@@ -75,6 +76,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
                 updateClusterNode(appIndex, node)
             }
         }
+        initialized = true
     }
 
     @PreDestroy
@@ -183,11 +185,14 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
     }
 
     /**
-     * The event callback in case there is a deployment event in the Kubernetes cluster.
+     * The event callback in case there is a deployment event in the cluster.
      *
      * @param event the deployment event
      */
     open fun deployment(@Observes event: ClusterDeploymentEvent) {
+        if(!initialized)
+            return
+
         val nodes = grid[event.index]
         when (event.type) {
             ClusterDeploymentEvent.Type.ADDED -> {

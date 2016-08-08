@@ -50,8 +50,6 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
 
     @PostConstruct
     open fun init() {
-        update()
-        apps.forEach { logger.debug("Found Marathon app {}", it?.id) }
         watch()
     }
 
@@ -60,7 +58,7 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
 
         apps.forEachIndexed { i, app ->
             if(app == null) return
-            val newApp = if (newApps[i].id.equals(app.id)) newApps[i] else newApps.find { it.id.equals(app.id) }
+            val newApp = newApps.find { it.id.equals(app.id) }
 
             if(newApp != null) { // app found in newApps
                 newApps.remove(newApp)
@@ -75,7 +73,7 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
                             ClusterDeploymentEvent.Type.SCALED_DOWN))
                 }
             } else { // app not found in newApps -> deleted
-                logger.debug("Deleted deployment {}.", apps[i]!!.id)
+                logger.debug("Deleted app {}.", apps[i]!!.id)
                 apps[i] = null
                 events.fire(ClusterDeploymentEvent(i, 0, labels(i), ClusterDeploymentEvent.Type.DELETED))
             }
@@ -89,6 +87,8 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
             } else {
                 apps[index] = newApp
             }
+
+            logger.debug("Added app {} at index {}.", apps[i]!!.id, index)
             events.fire(ClusterDeploymentEvent(index, newApp.instances, labels(index),
                     ClusterDeploymentEvent.Type.ADDED))
         }
@@ -113,15 +113,25 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
     override fun scale(appIndex: Int, replicas: Int) {
         val app = apps[appIndex]
         if(app == null) {
-            logger.error("Scaling failed! Not app at index {}.", appIndex)
+            logger.error("Scaling failed! No app at index {}.", appIndex)
             return
         }
 
         logger.debug("Scaling app {} to {} replicas.", app.id, replicas)
-        val result = client.updateApp(app.id, MarathonClient.ScalingUpdate(replicas)).execute().body()
-        val deployment = client.listDeployments().execute().body().find { it.id.equals(result.deploymentId) }!!
+        val result = client.updateApp(app.id, MarathonClient.ScalingUpdate(replicas)).execute()
+        apps[appIndex] = app.copy(instances = replicas)
+
+        if(result.isSuccessful) {
+            logger.debug("Scaling successful.")
+        } else {
+            logger.error("Scaling failed. ERROR: {}", result.errorBody().string())
+        }
+
+        /*
+        val deployment = client.listDeployments().execute().body().find { it.id.equals(result.body().deploymentId) }!!
         logger.debug("Scaling successful. Created depolyment {}.", deployment.id)
         deployments.add(deployment)
+        */
     }
 
     override fun labels(appIndex: Int) : Map<String, String> {
@@ -134,8 +144,13 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
     }
 
     private fun watch() {
-        scheduler.scheduleWithFixedDelay({
-            update()
-        }, 2500, 2500, TimeUnit.MILLISECONDS)
+        scheduler.scheduleAtFixedRate({
+            try {
+                update()
+            } catch (e : Exception) {
+                logger.error("Failed to update data!")
+                e.printStackTrace()
+            }
+        }, 0, 2500, TimeUnit.MILLISECONDS)
     }
 }

@@ -45,27 +45,26 @@ interface MarathonClient {
     @GET("v2/deployments")
     fun listDeployments() : Call<List<Deployment>>
 
-    data class App(
+    data class App (
             val id : String,
-            val cmd : String,
             val instances : Int,
             val deployments : List<Deployment>,
             val labels: Map<String, String>
     )
 
-    data class Apps(val apps : List<App>)
+    data class Apps (val apps : List<App>)
 
-    data class ScalingUpdate(val instances : Int)
+    data class ScalingUpdate (val instances : Int)
 
-    data class UpdateResult(val deploymentId : String)
+    data class UpdateResult (val deploymentId : String)
 
-    data class Deployment(
+    data class Deployment (
             val id : String,
             val affectedApps : List<String>?,
             val currentActions : List<Action>?
     )
 
-    data class Action(
+    data class Action (
             val action : ActionType,
             val app : String
     )

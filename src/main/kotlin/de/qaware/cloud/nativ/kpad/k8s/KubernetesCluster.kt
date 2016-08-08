@@ -58,6 +58,7 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
 
     @PostConstruct
     open fun init() {
+        logger.debug("Connect to Kubernetes master {}.", client.masterUrl)
         val operation = client.extensions().deployments().inNamespace(namespace)
         val list = operation.list()
         list?.items?.forEach {
@@ -67,6 +68,7 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
             names.add(name)
         }
 
+        // does not work with GCE (No HTTP 101)
         operation.watch(this)
     }
 

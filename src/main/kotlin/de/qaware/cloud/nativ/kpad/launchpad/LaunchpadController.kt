@@ -287,7 +287,7 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
      * Initialze the controller with its default state.
      */
     open fun init() {
-        logger.info("Initializing K8S cloud launchpad default state.")
+        logger.info("Initializing launchpad default state.")
 
         light(Switch.ON, Button.CURSOR_UP, BLUE)
         light(Switch.ON, Button.CURSOR_DOWN, BLUE)

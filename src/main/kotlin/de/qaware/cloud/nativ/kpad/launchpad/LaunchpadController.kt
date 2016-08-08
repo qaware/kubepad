@@ -247,7 +247,7 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
      */
     open fun started(@Observes @ClusterNodeEvent.Started event: ClusterNodeEvent) {
         val square = Square(event.row, event.column)
-        light(Switch.ON, square, LIGHT_GREEN)
+        light(Switch.ON, square, grid.color(event.row))
         if (grid.active(event.row) > 0 && (event.row != activeRow)) {
             // switch on the light of this is the first node
             light(Switch.ON, Button.right(event.row), PURPLE)

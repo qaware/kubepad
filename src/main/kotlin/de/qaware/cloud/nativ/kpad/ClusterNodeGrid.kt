@@ -23,6 +23,7 @@
  */
 package de.qaware.cloud.nativ.kpad
 
+import de.qaware.cloud.nativ.kpad.launchpad.LaunchpadMK2
 import org.slf4j.Logger
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.ScheduledExecutorService
@@ -53,6 +54,8 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
             mutableListOf<ClusterNode>(), mutableListOf<ClusterNode>(),
             mutableListOf<ClusterNode>(), mutableListOf<ClusterNode>(),
             mutableListOf<ClusterNode>(), mutableListOf<ClusterNode>())
+
+    private val colors = Array(8, {i -> LaunchpadMK2.Color.LIGHT_GREEN})
 
     /**
      * Initialize the cloud node grid.
@@ -196,10 +199,19 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
         val nodes = grid[event.index]
         when (event.type) {
             ClusterDeploymentEvent.Type.ADDED -> {
+                if(event.labels.containsKey("LAUNCHPAD_COLOR")) {
+                    try {
+                        colors[event.index] = LaunchpadMK2.Color.valueOf(event.labels["LAUNCHPAD_COLOR"]!!)
+                    } catch (e : Exception) {
+                        logger.error("Unknown color: {}!", event.labels["LAUNCHPAD_COLOR"])
+                    }
+                }
+
                 IntRange(0, event.replicas - 1).forEach {
                     val node = nodes[it]
                     updateClusterNode(event.index, node.activate())
                 }
+
                 // watch(event.index, event.labels)
             }
             ClusterDeploymentEvent.Type.DELETED -> {
@@ -251,6 +263,10 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
     private fun stopped(row: Int, node: ClusterNode) {
         events.select(object : AnnotationLiteral<ClusterNodeEvent.Stopped>() {})
                 .fire(ClusterNodeEvent(row, node.column))
+    }
+
+    open fun color(row: Int) : LaunchpadMK2.Color {
+        return if (colors.indices.contains(row)) colors[row] else LaunchpadMK2.Color.LIGHT_GREEN
     }
 
     /**

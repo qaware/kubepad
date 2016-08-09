@@ -15,20 +15,20 @@ First of all you need a Kubernetes or Marathon cluster. You can access a local i
 well as a remote master.
 
 .Kubernetes
-===
+****
 Make sure you have the proper configuration under `˜.kube/config`.
 Additionally set your master URL and namespace in the cluster.properties file.
 Then start Kubepad with the `-Dcluster.service=kubernetes` flag.
-===
+****
 
 .Marathon / DCOS
-===
+****
 For using Kubepad with Marathon you need an API access token. You can get yours by running
 `dcos config show core.dcos_acs_token` with the DCOS CLI installed.
 Save to a file and insert the path of this file in the cluster.properties file.
 Also specify your API endpoint in the form of `http://<your-dcos-url>/service/marathon/`.
 Then start Kubepad with the `-Dcluster.service=marathon` flag.
-===
+****
 
 Now you can start and use the Kubepad. Each row represents a running application, with
 the square buttons representing instances. You can start and stop an instance by

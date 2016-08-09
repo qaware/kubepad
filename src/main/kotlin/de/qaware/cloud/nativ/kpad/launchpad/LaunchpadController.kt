@@ -261,7 +261,7 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
      */
     open fun stopping(@Observes @ClusterNodeEvent.Stopping event: ClusterNodeEvent) {
         val square = Square(event.row, event.column)
-        blink(square, grid.color(event.row))
+        pulse(square, grid.color(event.row))
     }
 
     /**

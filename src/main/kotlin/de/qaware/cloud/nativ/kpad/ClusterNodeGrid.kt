@@ -72,7 +72,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
                 val node = nodes[i].activate()
                 node.phase = replica.phase()
 
-                updateClusterNode(appIndex, node)
+                updateClusterNode(node)
             }
         }
         initialized = true
@@ -86,12 +86,12 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
         }
     }
 
-    private fun updateClusterNode(row: Int, node: ClusterNode) {
+    private fun updateClusterNode(node: ClusterNode) {
         when (node.phase) {
-            ClusterNode.Phase.Pending -> starting(row, node)
-            ClusterNode.Phase.Running -> started(row, node)
-            ClusterNode.Phase.Succeeded -> stopping(row, node)
-            ClusterNode.Phase.Terminated -> stopped(row, node)
+            ClusterNode.Phase.Pending -> starting(node)
+            ClusterNode.Phase.Running -> started(node)
+            ClusterNode.Phase.Succeeded -> stopping(node)
+            ClusterNode.Phase.Terminated -> stopped(node)
             else -> {
                 // currently we can not handle the other Phases
                 // by different colors
@@ -112,7 +112,8 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
         val node = grid[event.row][event.column]
         val running = grid[event.row].count { it.active.get() }
 
-        updateClusterNode(event.row, node.activate())
+        node.activate().update(ClusterNode.Phase.Pending)
+        starting(node)
         executor.execute { cluster.scale(event.row, running + 1) }
     }
 
@@ -127,10 +128,9 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
         val node = grid[event.row][event.column]
         val running = grid[event.row].count { it.active.get() }
 
-        stopping(event.row, node)
-        node.deactivate()
+        node.update(ClusterNode.Phase.Succeeded)
+        stopping(node)
         executor.execute { cluster.scale(event.row, running - 1) }
-        stopped(event.row, node)
     }
 
     /**
@@ -148,18 +148,16 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
             val toStop = running - replicas - 1
             (0..toStop).forEach {
                 val node = grid[row][last(row)]
-                stopping(row, node)
-                node.deactivate()
-                stopped(row, node)
+                node.update(ClusterNode.Phase.Succeeded)
+                stopping(node)
             }
         } else if (running < replicas) {
             // scale up, start nodes and update display
             val toStart = replicas - running - 1
             (0..toStart).forEach {
                 val node = grid[row][next(row)]
-                starting(row, node)
-                node.activate()
-                started(row, node)
+                node.activate().update(ClusterNode.Phase.Pending)
+                starting(node)
             }
         }
     }
@@ -185,61 +183,77 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
                 }
 
                 IntRange(0, event.replicas - 1).forEach {
-                    val node = nodes[it]
-                    updateClusterNode(event.index, node.activate())
+                    val node = nodes[it].activate()
+                    started(node)
                 }
-
-                // watch(event.index, event.labels)
             }
+
             ClusterAppEvent.Type.DELETED -> {
                 IntRange(0, 7).forEach {
                     val node = nodes[it]
                     if (node.active.get()) {
-                        stopping(event.index, node)
                         node.deactivate()
-                        stopped(event.index, node)
+                        stopped(node)
                     }
                 }
             }
+
             ClusterAppEvent.Type.SCALED_UP -> {
-                val nonRunning = nodes.filter { !it.active.get() }
+                val nonRunning = nodes.filter { !it.active.get() || it.phase == ClusterNode.Phase.Pending }
                 val toStart = event.replicas - (nodes.size - nonRunning.size)
                 val range = 0..Math.min(toStart - 1, nonRunning.size - 1)
                 range.forEach {
                     val node = nonRunning[it]
-                    updateClusterNode(event.index, node.activate())
+                    node.activate().update(ClusterNode.Phase.Pending)
+                    starting(node)
                 }
             }
+
             ClusterAppEvent.Type.SCALED_DOWN -> {
                 val running = nodes.filter { it.active.get() }
                 val toStop = running.size - event.replicas
                 running.reversed().subList(0, toStop).forEach {
-                    stopping(event.index, it)
-                    it.deactivate()
-                    stopped(event.index, it)
+                    it.update(ClusterNode.Phase.Succeeded)
+                    stopping(it)
+                }
+            }
+
+            ClusterAppEvent.Type.DEPLOYED -> {
+                nodes.forEach {
+                    when(it.phase) {
+                        ClusterNode.Phase.Pending -> {
+                            it.update(ClusterNode.Phase.Running)
+                            started(it)
+                        }
+                        ClusterNode.Phase.Succeeded -> {
+                            it.deactivate()
+                            stopped(it)
+                        }
+                        else -> {}
+                    }
                 }
             }
         }
     }
 
-    private fun starting(row: Int, node: ClusterNode) {
+    private fun starting(node: ClusterNode) {
         events.select(object : AnnotationLiteral<ClusterNodeEvent.Starting>() {})
-                .fire(ClusterNodeEvent(row, node.column))
+                .fire(ClusterNodeEvent(node.row, node.column))
     }
 
-    private fun started(row: Int, node: ClusterNode) {
+    private fun started(node: ClusterNode) {
         events.select(object : AnnotationLiteral<ClusterNodeEvent.Started>() {})
-                .fire(ClusterNodeEvent(row, node.column))
+                .fire(ClusterNodeEvent(node.row, node.column))
     }
 
-    private fun stopping(row: Int, node: ClusterNode) {
+    private fun stopping(node: ClusterNode) {
         events.select(object : AnnotationLiteral<ClusterNodeEvent.Stopping>() {})
-                .fire(ClusterNodeEvent(row, node.column))
+                .fire(ClusterNodeEvent(node.row, node.column))
     }
 
-    private fun stopped(row: Int, node: ClusterNode) {
+    private fun stopped(node: ClusterNode) {
         events.select(object : AnnotationLiteral<ClusterNodeEvent.Stopped>() {})
-                .fire(ClusterNodeEvent(row, node.column))
+                .fire(ClusterNodeEvent(node.row, node.column))
     }
 
     open fun color(row: Int) : LaunchpadMK2.Color {

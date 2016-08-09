@@ -69,6 +69,12 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
                 } else if (app.instances > newApp.instances) { // -> scaled down
                     logger.debug("Scaled down app {} from {} to {} replicas.", app.id, app.instances, newApp.instances)
                     events.fire(ClusterAppEvent(i, newApp.instances, labels(i), ClusterAppEvent.Type.SCALED_DOWN))
+                } else if (app.deployments.count() != newApp.deployments.count()) { // -> status changed
+                    val deploying = newApp.deployments.count() != 0
+                    logger.debug("New status for app {}: deploying={}.", app.id, deploying)
+                    if(!deploying) {
+                        events.fire(ClusterAppEvent(i, newApp.instances, labels(i), ClusterAppEvent.Type.DEPLOYED))
+                    }
                 }
             } else { // app not found in newApps -> deleted
                 logger.debug("Deleted app {}.", apps[i]!!.id)
@@ -116,7 +122,7 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
 
         logger.debug("Scaling app {} to {} replicas.", app.id, replicas)
         val result = client.updateApp(app.id, MarathonClient.ScalingUpdate(replicas)).execute()
-        apps[appIndex] = app.copy(instances = replicas)
+        //apps[appIndex] = app.copy(instances = replicas)
 
         if(result.isSuccessful) {
             logger.debug("Scaling successful.")

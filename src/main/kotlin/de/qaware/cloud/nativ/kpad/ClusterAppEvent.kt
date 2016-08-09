@@ -31,6 +31,6 @@ data class ClusterAppEvent(val index: Int,
                            val labels: Map<String, String>,
                            val type: Type) {
     enum class Type {
-        ADDED, SCALED_UP, SCALED_DOWN, DELETED
+        ADDED, SCALED_UP, SCALED_DOWN, DELETED, DEPLOYED
     }
 }

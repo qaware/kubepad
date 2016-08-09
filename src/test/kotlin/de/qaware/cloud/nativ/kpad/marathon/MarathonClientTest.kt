@@ -41,7 +41,6 @@ class MarathonClientTest {
 
     val testApp = MarathonClient.App(
             id = "testapp",
-            cmd = "testcmd",
             instances = 3,
             deployments = listOf(
                     MarathonClient.Deployment(

@@ -9,9 +9,7 @@
       "apps": [
         {
           "id": "testapp",
-          "cmd": "testcmd",
           "instances": 3,
-          "cpus": 0.1,
           "deployments": [
             {
               "id": "testapp-d0"
@@ -20,6 +18,48 @@
           "labels": {
             "key": "value"
           }
+        },
+        {
+          "id": "testapp2",
+          "instances": 7,
+          "deployments": [],
+          "labels": {}
+        },
+        {
+          "id": "testapp3",
+          "instances": 2,
+          "deployments": [],
+          "labels": {}
+        },
+        {
+          "id": "testapp4",
+          "instances": 1,
+          "deployments": [],
+          "labels": {}
+        },
+        {
+          "id": "testapp5",
+          "instances": 8,
+          "deployments": [],
+          "labels": {}
+        },
+        {
+          "id": "testapp6",
+          "instances": 5,
+          "deployments": [],
+          "labels": {}
+        },
+        {
+          "id": "testapp7",
+          "instances": 4,
+          "deployments": [],
+          "labels": {}
+        },
+        {
+          "id": "testapp8",
+          "instances": 6,
+          "deployments": [],
+          "labels": {}
         }
       ]
     },

@@ -26,10 +26,10 @@ package de.qaware.cloud.nativ.kpad
 /**
  * An event data class for any cluster deployment events.
  */
-data class ClusterDeploymentEvent(val index: Int,
-                                  val replicas: Int,
-                                  val labels: Map<String, String>,
-                                  val type: Type) {
+data class ClusterAppEvent(val index: Int,
+                           val replicas: Int,
+                           val labels: Map<String, String>,
+                           val type: Type) {
     enum class Type {
         ADDED, SCALED_UP, SCALED_DOWN, DELETED
     }

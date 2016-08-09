@@ -24,8 +24,8 @@
 package de.qaware.cloud.nativ.kpad.marathon
 
 import de.qaware.cloud.nativ.kpad.Cluster
+import de.qaware.cloud.nativ.kpad.ClusterAppEvent
 import de.qaware.cloud.nativ.kpad.ClusterAppReplica
-import de.qaware.cloud.nativ.kpad.ClusterDeploymentEvent
 import de.qaware.cloud.nativ.kpad.ClusterNode
 import org.apache.deltaspike.core.api.exclude.Exclude
 import org.slf4j.Logger
@@ -42,7 +42,7 @@ import javax.inject.Named
 open class MarathonCluster @Inject constructor(private val client : MarathonClient,
                                                @Named("scheduled")
                                                private val scheduler: ScheduledExecutorService,
-                                               private val events: Event<ClusterDeploymentEvent>,
+                                               private val events: Event<ClusterAppEvent>,
                                                private val logger: Logger) : Cluster {
 
     private val apps = mutableListOf<MarathonClient.App?>()
@@ -65,17 +65,15 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
                 apps[i] = newApp
                 if (app.instances < newApp.instances) { // -> scaled up
                     logger.debug("Scaled up app {} from {} to {} replicas.", app.id, app.instances, newApp.instances)
-                    events.fire(ClusterDeploymentEvent(i, newApp.instances, labels(i),
-                            ClusterDeploymentEvent.Type.SCALED_UP))
+                    events.fire(ClusterAppEvent(i, newApp.instances, labels(i), ClusterAppEvent.Type.SCALED_UP))
                 } else if (app.instances > newApp.instances) { // -> scaled down
                     logger.debug("Scaled down app {} from {} to {} replicas.", app.id, app.instances, newApp.instances)
-                    events.fire(ClusterDeploymentEvent(i, newApp.instances, labels(i),
-                            ClusterDeploymentEvent.Type.SCALED_DOWN))
+                    events.fire(ClusterAppEvent(i, newApp.instances, labels(i), ClusterAppEvent.Type.SCALED_DOWN))
                 }
             } else { // app not found in newApps -> deleted
                 logger.debug("Deleted app {}.", apps[i]!!.id)
                 apps[i] = null
-                events.fire(ClusterDeploymentEvent(i, 0, labels(i), ClusterDeploymentEvent.Type.DELETED))
+                events.fire(ClusterAppEvent(i, 0, labels(i), ClusterAppEvent.Type.DELETED))
             }
         }
 
@@ -89,8 +87,7 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
             }
 
             logger.debug("Added app {} at index {}.", apps[i]!!.id, index)
-            events.fire(ClusterDeploymentEvent(index, newApp.instances, labels(index),
-                    ClusterDeploymentEvent.Type.ADDED))
+            events.fire(ClusterAppEvent(index, newApp.instances, labels(index), ClusterAppEvent.Type.ADDED))
         }
     }
 

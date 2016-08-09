@@ -24,8 +24,8 @@
 package de.qaware.cloud.nativ.kpad.k8s
 
 import de.qaware.cloud.nativ.kpad.Cluster
+import de.qaware.cloud.nativ.kpad.ClusterAppEvent
 import de.qaware.cloud.nativ.kpad.ClusterAppReplica
-import de.qaware.cloud.nativ.kpad.ClusterDeploymentEvent
 import de.qaware.cloud.nativ.kpad.ClusterNode
 import io.fabric8.kubernetes.api.KubernetesHelper
 import io.fabric8.kubernetes.api.model.Pod
@@ -49,7 +49,7 @@ import javax.inject.Inject
 open class KubernetesCluster @Inject constructor(private val client: KubernetesClient,
                                                  @ConfigProperty(name = "kubernetes.namespace")
                                                     private val namespace: String,
-                                                 private val events: Event<ClusterDeploymentEvent>,
+                                                 private val events: Event<ClusterAppEvent>,
                                                  private val logger: Logger)
                                                     : Watcher<Deployment>, Cluster {
 
@@ -142,8 +142,8 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
 
                 names.add(KubernetesHelper.getName(resource))
 
-                events.fire(ClusterDeploymentEvent(deployments.indexOf(resource),
-                        resource!!.spec.replicas, labels(resource), ClusterDeploymentEvent.Type.ADDED))
+                events.fire(ClusterAppEvent(deployments.indexOf(resource),
+                        resource!!.spec.replicas, labels(resource), ClusterAppEvent.Type.ADDED))
             }
             Watcher.Action.MODIFIED -> {
                 val name = KubernetesHelper.getName(resource)
@@ -156,12 +156,10 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
 
                 if (oldReplicas < newReplicas) {
                     logger.debug("Scaled up deployment {} from {} to {} replicas", name, oldReplicas, newReplicas)
-                    events.fire(ClusterDeploymentEvent(index, newReplicas, labels(resource),
-                            ClusterDeploymentEvent.Type.SCALED_UP))
+                    events.fire(ClusterAppEvent(index, newReplicas, labels(resource), ClusterAppEvent.Type.SCALED_UP))
                 } else if (oldReplicas > newReplicas) {
                     logger.debug("Scaled down deployment {} from {} to {} replicas", name, oldReplicas, newReplicas)
-                    events.fire(ClusterDeploymentEvent(index, newReplicas, labels(resource),
-                            ClusterDeploymentEvent.Type.SCALED_DOWN))
+                    events.fire(ClusterAppEvent(index, newReplicas, labels(resource), ClusterAppEvent.Type.SCALED_DOWN))
                 }
             }
             Watcher.Action.DELETED -> {
@@ -172,7 +170,7 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
                 deployments[index] = null
                 names[index] = null
 
-                events.fire(ClusterDeploymentEvent(index, 0, labels(resource), ClusterDeploymentEvent.Type.DELETED))
+                events.fire(ClusterAppEvent(index, 0, labels(resource), ClusterAppEvent.Type.DELETED))
             }
             Watcher.Action.ERROR -> {
                 // on error start blinking red with the row selection button

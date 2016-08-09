@@ -26,8 +26,6 @@ package de.qaware.cloud.nativ.kpad
 import de.qaware.cloud.nativ.kpad.launchpad.LaunchpadMK2
 import org.slf4j.Logger
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.TimeUnit
 import javax.annotation.PreDestroy
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.event.Event
@@ -42,8 +40,6 @@ import javax.inject.Named
 @ApplicationScoped
 open class ClusterNodeGrid @Inject constructor(@Named("default")
                                                private val executor: ExecutorService,
-                                               @Named("scheduled")
-                                               private val scheduler: ScheduledExecutorService,
                                                private val events: Event<ClusterNodeEvent>,
                                                private val cluster: Cluster,
                                                private val logger: Logger) {
@@ -88,25 +84,6 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
         grid.forEach { row ->
             row.forEach { it.deactivate() }
         }
-    }
-
-    private fun watch(row: Int, labels: MutableMap<String, String>) {
-        scheduler.scheduleWithFixedDelay({
-            if (!cluster.appExists(row)) {
-                throw IllegalStateException("No deployment at $row to watch.")
-            }
-
-            cluster.replicas(row).forEachIndexed { i, replica ->
-                val nodes = grid[row]
-                val active = nodes.filter { it.active.get() }
-
-                val node = active.elementAtOrElse(i) { nodes[next(row)].activate() }
-                if (node.active.get()) {
-                    node.update(replica.phase())
-                    updateClusterNode(row, node)
-                }
-            }
-        }, 2500, 2500, TimeUnit.MILLISECONDS)
     }
 
     private fun updateClusterNode(row: Int, node: ClusterNode) {
@@ -192,13 +169,13 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
      *
      * @param event the deployment event
      */
-    open fun deployment(@Observes event: ClusterDeploymentEvent) {
+    open fun onAppEvent(@Observes event: ClusterAppEvent) {
         if(!initialized)
             return
 
         val nodes = grid[event.index]
         when (event.type) {
-            ClusterDeploymentEvent.Type.ADDED -> {
+            ClusterAppEvent.Type.ADDED -> {
                 if(event.labels.containsKey("LAUNCHPAD_COLOR")) {
                     try {
                         colors[event.index] = LaunchpadMK2.Color.valueOf(event.labels["LAUNCHPAD_COLOR"]!!)
@@ -214,7 +191,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
 
                 // watch(event.index, event.labels)
             }
-            ClusterDeploymentEvent.Type.DELETED -> {
+            ClusterAppEvent.Type.DELETED -> {
                 IntRange(0, 7).forEach {
                     val node = nodes[it]
                     if (node.active.get()) {
@@ -224,7 +201,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
                     }
                 }
             }
-            ClusterDeploymentEvent.Type.SCALED_UP -> {
+            ClusterAppEvent.Type.SCALED_UP -> {
                 val nonRunning = nodes.filter { !it.active.get() }
                 val toStart = event.replicas - (nodes.size - nonRunning.size)
                 val range = 0..Math.min(toStart - 1, nonRunning.size - 1)
@@ -233,7 +210,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
                     updateClusterNode(event.index, node.activate())
                 }
             }
-            ClusterDeploymentEvent.Type.SCALED_DOWN -> {
+            ClusterAppEvent.Type.SCALED_DOWN -> {
                 val running = nodes.filter { it.active.get() }
                 val toStop = running.size - event.replicas
                 running.reversed().subList(0, toStop).forEach {

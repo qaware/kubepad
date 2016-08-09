@@ -5,24 +5,38 @@ image:https://img.shields.io/badge/license-MIT%20License-blue.svg["MIT License",
 
 = Kubepad
 
-A Kubernetes cluster remote control using a Novation launchpad MIDI controller.
+Remote control a Kubernetes or Marathon cluster using a Novation launchpad MIDI controller.
 
 image::kubepad-in-action.jpg[K8S Cloud Launchpad, 400, 400]
 
 == Usage
 
-First of all you need a Kubernetes cluster. You can access a local installation as
-well as a remote Kubernetes master. Make sure you have the proper configuration
-under `˜.kube/config`.
+First of all you need a Kubernetes or Marathon cluster. You can access a local installation as
+well as a remote master.
 
-Now you can start and use the Kubepad. Each row represents a Kubernetes deployment, with
-the square buttons representing pod instances. Running Pods are green, launching and
-pending Pods are yellow, and terminating pods are red. You can start and stop a Pod by
+.Kubernetes
+===
+Make sure you have the proper configuration under `˜.kube/config`.
+Additionally set your master URL and namespace in the cluster.properties file.
+Then start Kubepad with the `-Dcluster.service=kubernetes` flag.
+===
+
+.Marathon / DCOS
+===
+For using Kubepad with Marathon you need an API access token. You can get yours by running
+`dcos config show core.dcos_acs_token` with the DCOS CLI installed.
+Save to a file and insert the path of this file in the cluster.properties file.
+Also specify your API endpoint in the form of `http://<your-dcos-url>/service/marathon/`.
+Then start Kubepad with the `-Dcluster.service=marathon` flag.
+===
+
+Now you can start and use the Kubepad. Each row represents a running application, with
+the square buttons representing instances. You can start and stop an instance by
 directly pressing a square button. You can also select a row by pressing the buttons on
 the right hand side. The cursors at the top can also be used to select the row (up and down)
 and scale the row (left and right).
 
-You can also use a connected leap motion to control your Kubernetes cluster. Perform a swipe
+You can also use a connected leap motion to control your cluster. Perform a swipe
 gesture to scale to 5 Pods (= 5 fingers). Use key tap or screen tap gestures to move the
 row selection down or up.
 

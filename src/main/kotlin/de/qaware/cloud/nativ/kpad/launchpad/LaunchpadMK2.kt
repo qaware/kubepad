@@ -260,6 +260,14 @@ open class LaunchpadMK2 @Inject constructor(private val transmitter: Transmitter
      * Enum class for commonly used colors.
      */
     enum class Color(val value: Int) {
-        NONE(0), YELLOW(13), BLUE(45), PURPLE(53), RED(72), LIGHT_BLUE(79), LIGHT_GREEN(21), DARK_PURPLE(81)
+        NONE(0),
+        RED(5),
+        ORANGE(9),
+        YELLOW(13),
+        LIGHT_GREEN(17),
+        CYAN(33),
+        LIGHT_BLUE(37),
+        BLUE(45),
+        PURPLE(53)
     }
 }

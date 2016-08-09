@@ -55,7 +55,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
             mutableListOf<ClusterNode>(), mutableListOf<ClusterNode>(),
             mutableListOf<ClusterNode>(), mutableListOf<ClusterNode>())
 
-    private val colors = Array(8, {i -> LaunchpadMK2.Color.LIGHT_GREEN})
+    private val colors = Array(8, {i -> LaunchpadMK2.Color.values()[i + 1]})
 
     /**
      * Initialize the cloud node grid.

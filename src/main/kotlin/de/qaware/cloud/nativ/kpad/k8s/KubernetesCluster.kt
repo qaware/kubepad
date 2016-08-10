@@ -123,6 +123,8 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
                     .withReplicas(replicas)
                     .endSpec().done()
         }
+
+        events.fire(ClusterAppEvent(appIndex, replicas, labels(deployment), ClusterAppEvent.Type.DEPLOYED))
     }
 
     override fun eventReceived(action: Watcher.Action?, resource: Deployment?) {

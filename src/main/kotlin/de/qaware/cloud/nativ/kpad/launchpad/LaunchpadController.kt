@@ -94,7 +94,7 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
             }
         // cycle through the four bank buttons
             Button.SESSION -> {
-                stopAll()
+                grid.stopAll()
             }
 
             Button.USER_1 , Button.USER_2, Button.MIXER -> {
@@ -165,12 +165,6 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
                 .fire(ClusterNodeEvent(square.row, square.column))
     }
 
-    private fun stopAll() {
-        grid.rows().forEach {
-            grid.scale(it, 0)
-        }
-    }
-
     /**
      * Called when we have a button released event.
      *
@@ -229,10 +223,6 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
     open fun starting(@Observes @ClusterNodeEvent.Starting event: ClusterNodeEvent) {
         val square = Square(event.row, event.column)
         pulse(square, grid.color(event.row))
-        if (grid.active(event.row) > 0 && (event.row != activeRow)) {
-            // switch on the light of this is the first node
-            light(Switch.ON, Button.right(event.row), PURPLE)
-        }
     }
 
     /**
@@ -241,12 +231,13 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
      * @param event the node event data
      */
     open fun started(@Observes @ClusterNodeEvent.Started event: ClusterNodeEvent) {
+        if(event.column == 8) {
+            light(Switch.ON, Button.right(event.row), PURPLE)
+            return
+        }
+
         val square = Square(event.row, event.column)
         light(Switch.ON, square, grid.color(event.row))
-        if (grid.active(event.row) > 0 && (event.row != activeRow)) {
-            // switch on the light of this is the first node
-            light(Switch.ON, Button.right(event.row), PURPLE)
-        }
     }
 
     /**
@@ -265,17 +256,14 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
      * @param event the node event data
      */
     open fun stopped(@Observes @ClusterNodeEvent.Stopped event: ClusterNodeEvent) {
+        if(event.column == 8) {
+            light(Switch.OFF, Button.right(event.row))
+            if(event.row == activeRow) activeRow = -1
+            return
+        }
+
         val square = Square(event.row, event.column)
         light(Switch.OFF, square)
-
-        // switch off the light of this row if it was the last node
-        // and there is no deployment anymore
-        if (grid.active(event.row) == 0 && !grid.initialized(event.row)) {
-            light(Switch.OFF, Button.right(event.row))
-            if (event.row == activeRow) {
-                activeRow = -1
-            }
-        }
     }
 
     /**

@@ -107,6 +107,14 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
         executor.execute { cluster.scale(event.row, running - 1) }
     }
 
+    open fun stopAll() {
+        0.until(8).forEach {
+            if(cluster.replicas(it) > 0) {
+                scale(it, 0)
+            }
+        }
+    }
+
     /**
      * Scale the deployment at given row to number of specified replicas.
      *
@@ -114,22 +122,19 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
      * @param replicas number of replicas
      */
     open fun scale(row: Int, replicas: Int) {
-        val running = active(row)
         executor.execute { cluster.scale(row, replicas) }
 
-        if (running > replicas) {
-            // scale down, stop nodes and update display
-            val toStop = running - replicas - 1
-            (0..toStop).forEach {
-                val node = grid[row][last(row)]
+        val active = grid[row].filter { it.active.get() }
+
+        if (active.count() > replicas) { // scale down, stop nodes and update display
+            0.until(active.count() - replicas).forEach {
+                val node = active[active.count() - it - 1]
                 node.update(ClusterNode.Phase.Succeeded)
                 stopping(node)
             }
-        } else if (running < replicas) {
-            // scale up, start nodes and update display
-            val toStart = replicas - running - 1
-            (0..toStart).forEach {
-                val node = grid[row][next(row)]
+        } else if (active.count() < replicas) { // scale up, start nodes and update display
+            0.until(replicas - active.count()).forEach {
+                val node = grid[row].first { !it.active.get() }
                 node.activate().update(ClusterNode.Phase.Pending)
                 starting(node)
             }
@@ -158,14 +163,17 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
                     }
                 }
 
-                IntRange(0, event.replicas - 1).forEach {
+                started(ClusterNode(event.index, 8))
+                0.until(event.replicas).forEach {
                     val node = nodes[it].activate()
                     started(node)
                 }
             }
 
             ClusterAppEvent.Type.DELETED -> {
-                IntRange(0, 7).forEach {
+                colors[event.index] = LaunchpadMK2.Color.values()[event.index + 1]
+                stopped(ClusterNode(event.index, 8))
+                0.until(8).forEach {
                     val node = nodes[it]
                     if (node.active.get()) {
                         node.deactivate()

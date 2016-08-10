@@ -108,9 +108,7 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
 
     override fun appExists(appIndex: Int): Boolean = apps.indices.contains(appIndex) && apps[appIndex] != null
 
-    override fun replicas(appIndex: Int): Int {
-        return apps[appIndex]?.instances ?: -1
-    }
+    override fun replicas(appIndex: Int): Int = apps[appIndex]?.instances ?: -1
 
     override fun scale(appIndex: Int, replicas: Int) {
         val app = apps[appIndex]

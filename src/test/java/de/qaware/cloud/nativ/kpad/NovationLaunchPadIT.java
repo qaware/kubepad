@@ -57,8 +57,8 @@ public class NovationLaunchPadIT {
     public void testDefaultMidiSystemTransmitterReceiver() throws Exception {
         // these here do not seem to make any difference
         // maybe when there are multiple MIDI devices
-        //System.setProperty("javax.sound.midi.Transmitter", "com.sun.media.sound.MidiInDeviceProvider#Launchpad MK2");
-        //System.setProperty("javax.sound.midi.Receiver", "com.sun.media.sound.MidiOutDeviceProvider#Launchpad MK2");
+        System.setProperty("javax.sound.midi.Transmitter", "com.sun.media.sound.MidiInDeviceProvider#Launchpad MK2");
+        System.setProperty("javax.sound.midi.Receiver", "com.sun.media.sound.MidiOutDeviceProvider#Launchpad MK2");
 
         // check the default transmitter and receiver
         Transmitter transmitter = MidiSystem.getTransmitter();

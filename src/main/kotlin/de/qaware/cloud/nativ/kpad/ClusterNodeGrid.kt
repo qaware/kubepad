@@ -199,7 +199,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
             }
 
             ClusterAppEvent.Type.SCALED_UP -> {
-                val nonRunning = nodes.filter { !it.active.get() || it.phase == ClusterNode.Phase.Pending }
+                val nonRunning = nodes.filter { !it.active.get() }
                 val toStart = event.replicas - (nodes.size - nonRunning.size)
                 val range = 0..Math.min(toStart - 1, nonRunning.size - 1)
                 range.forEach {

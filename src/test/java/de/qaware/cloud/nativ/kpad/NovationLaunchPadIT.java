@@ -29,6 +29,7 @@ import javax.sound.midi.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
@@ -107,6 +108,50 @@ public class NovationLaunchPadIT {
         TimeUnit.SECONDS.sleep(3);
 
         receiver.send(new ShortMessage(144, 0, 11, 0), -1);
+    }
+
+    @Test
+    public void testColors() throws Exception {
+        System.setProperty("javax.sound.midi.Transmitter", "com.sun.media.sound.MidiInDeviceProvider#Launchpad MK2");
+        System.setProperty("javax.sound.midi.Receiver", "com.sun.media.sound.MidiOutDeviceProvider#Launchpad MK2");
+        Receiver receiver = MidiSystem.getReceiver();
+        Transmitter transmitter = MidiSystem.getTransmitter();
+
+        for(int b = 0; b < 2; b++) {
+            final int bf = b;
+            transmitter.setReceiver(simpleReceiver(id -> {
+                int col = id / 10 - 1;
+                int row = id - ((col + 1) * 10 + 1);
+                int color = (row + (8 - col - 1) * 8) + bf * 64;
+                System.out.println("Color " + color);
+            }));
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    int id = 11 + i + 10 * j;
+                    int command = 144;
+                    receiver.send(new ShortMessage(command, 0, id, i + (8 - j - 1) * 8 + bf * 64), -1);
+                }
+            }
+            TimeUnit.SECONDS.sleep(5);
+        }
+
+    }
+
+    private Receiver simpleReceiver(IntConsumer receiver) {
+        return new Receiver() {
+            @Override
+            public void send(MidiMessage message, long timeStamp) {
+                if(!(message instanceof ShortMessage))
+                    return;
+                ShortMessage sm = (ShortMessage) message;
+                if(sm.getData2() != 127)
+                    return;
+                receiver.accept(sm.getData1());
+            }
+
+            @Override
+            public void close() {}
+        };
     }
 
     @Test

@@ -25,10 +25,7 @@ package de.qaware.cloud.nativ.kpad.k8s
 
 import de.qaware.cloud.nativ.kpad.Cluster
 import de.qaware.cloud.nativ.kpad.ClusterAppEvent
-import de.qaware.cloud.nativ.kpad.ClusterAppReplica
-import de.qaware.cloud.nativ.kpad.ClusterNode
 import io.fabric8.kubernetes.api.KubernetesHelper
-import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.api.model.extensions.Deployment
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientException
@@ -53,8 +50,8 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
                                                  private val logger: Logger)
                                                     : Watcher<Deployment>, Cluster {
 
-    private val deployments = mutableListOf<Deployment?>()
-    private val names = mutableListOf<String?>()
+    private val deployments = Array<Deployment?>(8, {i -> null})
+    private val names = Array<String?>(8, {i -> null})
 
     @PostConstruct
     open fun init() {
@@ -62,24 +59,14 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
         val operation = client.extensions().deployments().inNamespace(namespace)
         val list = operation.list()
         list?.items?.forEach {
-            val name = KubernetesHelper.getName(it)
-            logger.debug("Found Kubernetes deployment {} -> {}", name, it)
-            deployments.add(it)
-            names.add(name)
+            addDepolyment(it)
         }
 
         // does not work with GCE (No HTTP 101)
         operation.watch(this)
     }
 
-    override fun clear() {
-        deployments.clear()
-        names.clear()
-    }
-
-    override fun appCount(): Int = deployments.count()
-
-    override fun appExists(appIndex: Int) = deployments[appIndex] != null
+    override fun appExists(appIndex: Int) = deployments.indices.contains(appIndex) &&deployments[appIndex] != null
 
     override fun labels(appIndex: Int) : Map<String, String> {
         return labels(deployments[appIndex])
@@ -89,17 +76,31 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
         return KubernetesHelper.getLabels(deployment)
     }
 
-    override fun replicas(appIndex: Int): List<ClusterAppReplica> {
-        val labels = labels(appIndex)
-        val pods = client.pods().inNamespace(namespace).withLabels(labels).list()?.items ?: emptyList()
-        return pods.map {pod -> replica(pod)}
+    override fun replicas(appIndex: Int): Int {
+        return deployments[appIndex]?.spec?.replicas ?: -1
     }
 
-    private fun replica(pod : Pod) : ClusterAppReplica {
-        return object : ClusterAppReplica {
-            override fun phase() : ClusterNode.Phase = ClusterNode.Phase.valueOf(pod.status.phase)
-            override fun name() : String = KubernetesHelper.getName(pod)
+    private fun addDepolyment(deployment: Deployment) {
+        val name = KubernetesHelper.getName(deployment)
+        var index = deployments.indexOfFirst { it == null }
+
+        if(index == -1) {
+            logger.debug("Found new deployment {} but could not add because all rows are occupied!", name)
+            return
         }
+
+        val labels = labels(deployment)
+        if(labels.containsKey("LAUNCHPAD_ROW")) {
+            val row = labels["LAUNCHPAD_ROW"]!!.toInt()
+            if(deployments.indices.contains(row) && deployments[row] == null) {
+                index = row
+            }
+        }
+
+        deployments[index] = deployment
+        names[index] = name
+        logger.debug("Added depolyment {} at index {}.", name, index)
+        events.fire(ClusterAppEvent(index, replicas(index), labels(deployment), ClusterAppEvent.Type.ADDED))
     }
 
     /**
@@ -130,27 +131,14 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
     override fun eventReceived(action: Watcher.Action?, resource: Deployment?) {
         when (action) {
             Watcher.Action.ADDED -> {
-                val name = KubernetesHelper.getName(resource)
-                logger.debug("Added deployment {}.", name)
-
-                val index = deployments.indexOfFirst { it == null }
-                if (index == -1) {
-                    deployments.add(resource!!)
-                    names.add(name)
-                } else {
-                    deployments[index] = resource
-                    names[index] = name
-                }
-
-                names.add(KubernetesHelper.getName(resource))
-
-                events.fire(ClusterAppEvent(deployments.indexOf(resource),
-                        resource!!.spec.replicas, labels(resource), ClusterAppEvent.Type.ADDED))
+                addDepolyment(Deployment())
             }
+
             Watcher.Action.MODIFIED -> {
                 val name = KubernetesHelper.getName(resource)
                 val index = names.indexOf(name)
-                val previous = deployments.set(index, resource)
+                val previous = deployments[index]
+                deployments[index] = resource
 
                 // now check if the number of replicas has changed
                 val oldReplicas = previous?.spec?.replicas ?: 0
@@ -164,6 +152,7 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
                     events.fire(ClusterAppEvent(index, newReplicas, labels(resource), ClusterAppEvent.Type.SCALED_DOWN))
                 }
             }
+
             Watcher.Action.DELETED -> {
                 val name = KubernetesHelper.getName(resource)
                 logger.debug("Deleted deployment {}.", name)
@@ -174,6 +163,7 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
 
                 events.fire(ClusterAppEvent(index, 0, labels(resource), ClusterAppEvent.Type.DELETED))
             }
+
             Watcher.Action.ERROR -> {
                 // on error start blinking red with the row selection button
             }

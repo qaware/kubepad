@@ -26,13 +26,6 @@ package de.qaware.cloud.nativ.kpad
 interface Cluster {
 
     /**
-     * @return the size of the list of apps. This number may be lager than the actual number of currently deployed apps,
-     * as there is not an app at every index.
-     * @see Cluster.appExists()
-     */
-    fun appCount() : Int
-
-    /**
      * Check if there is an app deployed at the given index
      *
      * @param appIndex the index (row) to be checked
@@ -41,11 +34,11 @@ interface Cluster {
     fun appExists(appIndex : Int) : Boolean
 
     /**
-     * Retrieves the list of all replicas of the app at the given index. Each of the replicas is represented by one
+     * Retrieves the number of all replicas of the app at the given index. Each of the replicas is represented by one
      * square on the launchpad.
-     * If the specified app does not exist a empty list will be returned.
+     * If the specified app does not exist -1 will be returned.
      */
-    fun replicas(appIndex : Int) : List<ClusterAppReplica>
+    fun replicas(appIndex : Int) : Int
 
     /**
      * Each app can be annotated with additional information in the form of labels which are stored as key-value pairs.
@@ -62,8 +55,4 @@ interface Cluster {
      */
     fun scale(appIndex : Int, replicas : Int)
 
-    /**
-     * Clears the local list of apps.
-     */
-    fun clear()
 }

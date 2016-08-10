@@ -299,9 +299,6 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
             light(Switch.ON, button, PURPLE)
         }
 
-        // initialize the grid
-        grid.init()
-
         if (rows.size > 0) {
             val button = Button.right(rows.first())
             light(Switch.ON, button, BLUE)

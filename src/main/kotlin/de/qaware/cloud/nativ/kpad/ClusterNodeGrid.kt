@@ -26,6 +26,7 @@ package de.qaware.cloud.nativ.kpad
 import de.qaware.cloud.nativ.kpad.launchpad.LaunchpadMK2
 import org.slf4j.Logger
 import java.util.concurrent.ExecutorService
+import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.event.Event
@@ -56,6 +57,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
     /**
      * Initialize the cloud node grid.
      */
+    @PostConstruct
     open fun init() {
         logger.info("Initialize 8x8 cluster node grid.")
 
@@ -63,41 +65,13 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
             IntRange(0, 7).forEach { instances.add(ClusterNode(row, it)) }
         }
 
-        0.until(cluster.appCount()).forEach { appIndex ->
-            val nodes = grid[appIndex]
-
-            cluster.replicas(appIndex).forEachIndexed { i, replica ->
-                logger.debug("Activating pod {}.", replica.name())
-
-                val node = nodes[i].activate()
-                node.phase = replica.phase()
-
-                updateClusterNode(node)
-            }
-        }
         initialized = true
     }
 
     @PreDestroy
     open fun shutdown() {
-        cluster.clear()
         grid.forEach { row ->
             row.forEach { it.deactivate() }
-        }
-    }
-
-    private fun updateClusterNode(node: ClusterNode) {
-        when (node.phase) {
-            ClusterNode.Phase.Pending -> starting(node)
-            ClusterNode.Phase.Running -> started(node)
-            ClusterNode.Phase.Succeeded -> stopping(node)
-            ClusterNode.Phase.Terminated -> stopped(node)
-            else -> {
-                // currently we can not handle the other Phases
-                // by different colors
-                // Unknown should be treated as stopped?
-                // Failed should be treated as stopping?
-            }
         }
     }
 
@@ -168,8 +142,10 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
      * @param event the deployment event
      */
     open fun onAppEvent(@Observes event: ClusterAppEvent) {
-        if(!initialized)
+        if(!initialized) {
+            logger.debug("Ignoring event {}.", event)
             return
+        }
 
         val nodes = grid[event.index]
         when (event.type) {
@@ -306,6 +282,6 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
      * @return a set of row index with an associated deployment
      */
     open fun rows(): List<Int> {
-        return 0.until(cluster.appCount()).filter { i -> cluster.appExists(i) }
+        return 0.until(8).filter { i -> cluster.appExists(i) }
     }
 }

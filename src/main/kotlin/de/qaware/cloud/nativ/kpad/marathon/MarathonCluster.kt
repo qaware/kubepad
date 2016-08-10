@@ -25,8 +25,6 @@ package de.qaware.cloud.nativ.kpad.marathon
 
 import de.qaware.cloud.nativ.kpad.Cluster
 import de.qaware.cloud.nativ.kpad.ClusterAppEvent
-import de.qaware.cloud.nativ.kpad.ClusterAppReplica
-import de.qaware.cloud.nativ.kpad.ClusterNode
 import org.apache.deltaspike.core.api.exclude.Exclude
 import org.slf4j.Logger
 import java.util.concurrent.ScheduledExecutorService
@@ -45,8 +43,8 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
                                                private val events: Event<ClusterAppEvent>,
                                                private val logger: Logger) : Cluster {
 
-    private val apps = mutableListOf<MarathonClient.App?>()
-    private val deploying = mutableListOf<Boolean>()
+    private val apps = Array<MarathonClient.App?>(8 , {i -> null})
+    private val deploying = Array<Boolean>(8, {i -> false})
 
     @PostConstruct
     open fun init() {
@@ -57,7 +55,7 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
         val newApps = client.listApps().execute().body().apps.toMutableList()
 
         apps.forEachIndexed { i, app ->
-            if(app == null) return
+            if(app == null) return@forEachIndexed
             val newApp = newApps.find { it.id.equals(app.id) }
 
             if(newApp != null) { // app found in newApps
@@ -88,34 +86,30 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
 
         newApps.forEachIndexed { i, newApp -> // newApp not (yet) in apps -> added
             var index = apps.indexOfFirst { it == null }
-            if (index == -1) {
-                index = apps.count()
-                apps.add(newApp)
-                deploying.add(false)
-            } else {
-                apps[index] = newApp
-                deploying[index] = false
+
+            if(index == -1) {
+                logger.debug("Found new app {} but could not add because all rows are occupied!", newApp.id)
+                return@forEachIndexed
             }
 
-            logger.debug("Added app {} at index {}.", apps[i]!!.id, index)
+            if(newApp.labels.containsKey("LAUNCHPAD_ROW")) {
+                val row = newApp.labels["LAUNCHPAD_ROW"]!!.toInt()
+                if(apps.indices.contains(row) && apps[row] == null) {
+                    index = row
+                }
+            }
+
+            apps[index] = newApp
+            deploying[index] = false
+            logger.debug("Added app {} at index {}.", newApp.id, index)
             events.fire(ClusterAppEvent(index, newApp.instances, labels(index), ClusterAppEvent.Type.ADDED))
         }
     }
 
-    override fun appCount(): Int = apps.count()
+    override fun appExists(appIndex: Int): Boolean = apps.indices.contains(appIndex) && apps[appIndex] != null
 
-    override fun appExists(appIndex: Int): Boolean = appIndex < apps.count()
-
-    override fun replicas(appIndex: Int): List<ClusterAppReplica> {
-        val app = apps[appIndex]
-        val instances = mutableListOf<ClusterAppReplica>()
-        for(i in 0.until(app?.instances ?: 0)) {
-            instances.add(object : ClusterAppReplica {
-                override fun phase() : ClusterNode.Phase = ClusterNode.Phase.Running
-                override fun name() : String = app!!.id + "-instance" + i
-            })
-        }
-        return instances
+    override fun replicas(appIndex: Int): Int {
+        return apps[appIndex]?.instances ?: -1
     }
 
     override fun scale(appIndex: Int, replicas: Int) {
@@ -136,21 +130,10 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
         } else {
             logger.error("Scaling failed. ERROR: {}", result.errorBody().string())
         }
-
-        /*
-        val deployment = client.listDeployments().execute().body().find { it.id.equals(result.body().deploymentId) }!!
-        logger.debug("Scaling successful. Created depolyment {}.", deployment.id)
-        deployments.add(deployment)
-        */
     }
 
     override fun labels(appIndex: Int) : Map<String, String> {
         return apps[appIndex]?.labels ?: emptyMap()
-    }
-
-    override fun clear() {
-        apps.clear()
-        deploying.clear()
     }
 
     private fun watch() {

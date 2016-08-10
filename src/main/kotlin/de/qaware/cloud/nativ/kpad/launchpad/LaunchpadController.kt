@@ -93,7 +93,11 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
                 }
             }
         // cycle through the four bank buttons
-            Button.SESSION, Button.USER_1, Button.USER_2, Button.MIXER -> {
+            Button.SESSION -> {
+                stopAll()
+            }
+
+            Button.USER_1 , Button.USER_2, Button.MIXER -> {
                 light(Switch.ON, event.switchable, PURPLE)
             }
         // direct selection of active row button
@@ -161,6 +165,12 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
                 .fire(ClusterNodeEvent(square.row, square.column))
     }
 
+    private fun stopAll() {
+        grid.rows().forEach {
+            grid.scale(it, 0)
+        }
+    }
+
     /**
      * Called when we have a button released event.
      *
@@ -174,25 +184,10 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
             Button.CURSOR_LEFT, Button.CURSOR_RIGHT -> {
                 light(Switch.ON, event.switchable, BLUE)
             }
-            Button.SESSION -> {
+            Button.USER_1, Button.USER_2, Button.MIXER -> {
                 light(Switch.OFF, Button.USER_1)
                 light(Switch.OFF, Button.USER_2)
                 light(Switch.OFF, Button.MIXER)
-            }
-            Button.USER_1 -> {
-                light(Switch.OFF, Button.SESSION)
-                light(Switch.OFF, Button.USER_2)
-                light(Switch.OFF, Button.MIXER)
-            }
-            Button.USER_2 -> {
-                light(Switch.OFF, Button.SESSION)
-                light(Switch.OFF, Button.USER_1)
-                light(Switch.OFF, Button.MIXER)
-            }
-            Button.MIXER -> {
-                light(Switch.OFF, Button.SESSION)
-                light(Switch.OFF, Button.USER_1)
-                light(Switch.OFF, Button.USER_2)
             }
         }
     }
@@ -293,7 +288,8 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
         light(Switch.ON, Button.CURSOR_DOWN, BLUE)
         light(Switch.ON, Button.CURSOR_LEFT, BLUE)
         light(Switch.ON, Button.CURSOR_RIGHT, BLUE)
-        light(Switch.ON, Button.SESSION, PURPLE)
+
+        light(Switch.ON, Button.SESSION, RED)
 
         // and we need to set the default state
         // for the cluster node grid

@@ -23,6 +23,9 @@
  */
 package de.qaware.cloud.nativ.kpad
 
+/**
+ * Generic interface definition to interact with different cluster schedulers.
+ */
 interface Cluster {
 
     /**
@@ -31,21 +34,21 @@ interface Cluster {
      * @param appIndex the index (row) to be checked
      * @return true if an app is deployed at the given index
      */
-    fun appExists(appIndex : Int) : Boolean
+    fun appExists(appIndex: Int): Boolean
 
     /**
      * Retrieves the number of all replicas of the app at the given index. Each of the replicas is represented by one
      * square on the launchpad.
      * If the specified app does not exist -1 will be returned.
      */
-    fun replicas(appIndex : Int) : Int
+    fun replicas(appIndex: Int): Int
 
     /**
      * Each app can be annotated with additional information in the form of labels which are stored as key-value pairs.
      * If the specified app does not exist a empty map will be returned.
      * @return A map of label keys and their values.
      */
-    fun labels(appIndex : Int) : Map<String, String>
+    fun labels(appIndex: Int): Map<String, String>
 
     /**
      * Scale the app at the given index to a number of given replicas.
@@ -53,6 +56,6 @@ interface Cluster {
      * @param appIndex the deployment index on the Launchpad
      * @param replicas the number of replicas
      */
-    fun scale(appIndex : Int, replicas : Int)
+    fun scale(appIndex: Int, replicas: Int)
 
 }

@@ -68,8 +68,12 @@ class MarathonClientTest {
         val deployments = client.listDeployments().execute().body()
         deployments.forEach { println("Found Marathon deployment with id ${it.id}") }
 
-        val appsWithDeployments = apps.map { app -> app.copy(deployments = deployments.filter {
-            dep -> app.deployments.any { it.id.equals(dep.id) } }) }
+        val appsWithDeployments = apps.map { app ->
+            app.copy(deployments = deployments.filter {
+                dep ->
+                app.deployments.any { it.id.equals(dep.id) }
+            })
+        }
 
         for (app in appsWithDeployments) {
             println(app.toString())

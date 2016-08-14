@@ -35,16 +35,19 @@ import javax.enterprise.event.Event
 import javax.inject.Inject
 import javax.inject.Named
 
-@Exclude(onExpression="cluster.service!=marathon")
+/**
+ * The DC/OS Marathon specific cluster implementation.
+ */
+@Exclude(onExpression = "cluster.service!=marathon")
 @ApplicationScoped
-open class MarathonCluster @Inject constructor(private val client : MarathonClient,
+open class MarathonCluster @Inject constructor(private val client: MarathonClient,
                                                @Named("scheduled")
                                                private val scheduler: ScheduledExecutorService,
                                                private val events: Event<ClusterAppEvent>,
                                                private val logger: Logger) : Cluster {
 
-    private val apps = Array<MarathonClient.App?>(8 , {i -> null})
-    private val deploying = Array<Boolean>(8, {i -> false})
+    private val apps = Array<MarathonClient.App?>(8, { i -> null })
+    private val deploying = Array<Boolean>(8, { i -> false })
 
     @PostConstruct
     open fun init() {
@@ -55,10 +58,11 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
         val newApps = client.listApps().execute().body().apps.toMutableList()
 
         apps.forEachIndexed { i, app ->
-            if(app == null) return@forEachIndexed
+            if (app == null) return
+
             val newApp = newApps.find { it.id.equals(app.id) }
 
-            if(newApp != null) { // app found in newApps
+            if (newApp != null) { // app found in newApps
                 newApps.remove(newApp)
                 apps[i] = newApp
 
@@ -87,14 +91,14 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
         newApps.forEachIndexed { i, newApp -> // newApp not (yet) in apps -> added
             var index = apps.indexOfFirst { it == null }
 
-            if(index == -1) {
+            if (index == -1) {
                 logger.debug("Found new app {} but could not add because all rows are occupied!", newApp.id)
                 return@forEachIndexed
             }
 
-            if(newApp.labels.containsKey("LAUNCHPAD_ROW")) {
+            if (newApp.labels.containsKey("LAUNCHPAD_ROW")) {
                 val row = newApp.labels["LAUNCHPAD_ROW"]!!.toInt()
-                if(apps.indices.contains(row) && apps[row] == null) {
+                if (apps.indices.contains(row) && apps[row] == null) {
                     index = row
                 }
             }
@@ -112,7 +116,7 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
 
     override fun scale(appIndex: Int, replicas: Int) {
         val app = apps[appIndex]
-        if(app == null) {
+        if (app == null) {
             logger.error("Scaling failed! No app at index {}.", appIndex)
             return
         }
@@ -123,14 +127,14 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
         apps[appIndex] = app.copy(instances = replicas)
         deploying[appIndex] = true
 
-        if(result.isSuccessful) {
+        if (result.isSuccessful) {
             logger.debug("Scaling successful.")
         } else {
             logger.error("Scaling failed. ERROR: {}", result.errorBody().string())
         }
     }
 
-    override fun labels(appIndex: Int) : Map<String, String> {
+    override fun labels(appIndex: Int): Map<String, String> {
         return apps[appIndex]?.labels ?: emptyMap()
     }
 
@@ -138,7 +142,7 @@ open class MarathonCluster @Inject constructor(private val client : MarathonClie
         scheduler.scheduleAtFixedRate({
             try {
                 update()
-            } catch (e : Exception) {
+            } catch (e: Exception) {
                 logger.error("Failed to update data!")
                 e.printStackTrace()
             }

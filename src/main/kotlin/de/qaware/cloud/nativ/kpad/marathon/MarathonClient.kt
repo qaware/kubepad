@@ -45,12 +45,8 @@ interface MarathonClient {
     @GET("v2/deployments")
     fun listDeployments(): Call<List<Deployment>>
 
-    data class App(
-            val id: String,
-            val instances: Int,
-            val deployments: List<Deployment>,
-            val labels: Map<String, String>
-    )
+    data class App(val id: String, val instances: Int,
+                   val deployments: List<Deployment>, val labels: Map<String, String>)
 
     data class Apps(val apps: List<App>)
 
@@ -58,16 +54,9 @@ interface MarathonClient {
 
     data class UpdateResult(val deploymentId: String)
 
-    data class Deployment(
-            val id: String,
-            val affectedApps: List<String>?,
-            val currentActions: List<Action>?
-    )
+    data class Deployment(val id: String, val affectedApps: List<String>?, val currentActions: List<Action>?)
 
-    data class Action(
-            val action: ActionType,
-            val app: String
-    )
+    data class Action(val action: ActionType, val app: String)
 
     enum class ActionType {
         StartApplication, StopApplication, ScaleApplication, RestartApplication, ResolveArtifacts

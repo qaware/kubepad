@@ -44,7 +44,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
                                                private val events: Event<ClusterNodeEvent>,
                                                private val cluster: Cluster,
                                                private val logger: Logger) {
-    private var initialized : Boolean = false
+    private var initialized: Boolean = false
 
     private val grid = arrayOf(
             mutableListOf<ClusterNode>(), mutableListOf<ClusterNode>(),
@@ -52,7 +52,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
             mutableListOf<ClusterNode>(), mutableListOf<ClusterNode>(),
             mutableListOf<ClusterNode>(), mutableListOf<ClusterNode>())
 
-    private val colors = Array(8, {i -> LaunchpadMK2.Color.values()[i + 1]})
+    private val colors = Array(8, { i -> LaunchpadMK2.Color.values()[i + 1] })
 
     /**
      * Initialize the cloud node grid.
@@ -109,7 +109,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
 
     open fun stopAll() {
         0.until(8).forEach {
-            if(cluster.replicas(it) > 0) {
+            if (cluster.replicas(it) > 0) {
                 scale(it, 0)
             }
         }
@@ -147,7 +147,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
      * @param event the deployment event
      */
     open fun onAppEvent(@Observes event: ClusterAppEvent) {
-        if(!initialized) {
+        if (!initialized) {
             logger.debug("Ignoring event {}.", event)
             return
         }
@@ -155,10 +155,10 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
         val nodes = grid[event.index]
         when (event.type) {
             ClusterAppEvent.Type.ADDED -> {
-                if(event.labels.containsKey("LAUNCHPAD_COLOR")) {
+                if (event.labels.containsKey("LAUNCHPAD_COLOR")) {
                     try {
                         colors[event.index] = LaunchpadMK2.Color.valueOf(event.labels["LAUNCHPAD_COLOR"]!!)
-                    } catch (e : Exception) {
+                    } catch (e: Exception) {
                         logger.error("Unknown color: {}!", event.labels["LAUNCHPAD_COLOR"])
                     }
                 }
@@ -204,7 +204,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
 
             ClusterAppEvent.Type.DEPLOYED -> {
                 nodes.forEach {
-                    when(it.phase) {
+                    when (it.phase) {
                         ClusterNode.Phase.Pending -> {
                             it.update(ClusterNode.Phase.Running)
                             started(it)
@@ -213,7 +213,8 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
                             it.deactivate()
                             stopped(it)
                         }
-                        else -> {}
+                        else -> {
+                        }
                     }
                 }
             }
@@ -240,7 +241,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
                 .fire(ClusterNodeEvent(node.row, node.column))
     }
 
-    open fun color(row: Int) : LaunchpadMK2.Color {
+    open fun color(row: Int): LaunchpadMK2.Color {
         return if (colors.indices.contains(row)) colors[row] else LaunchpadMK2.Color.LIGHT_GREEN
     }
 

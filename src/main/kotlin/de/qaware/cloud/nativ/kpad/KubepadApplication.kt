@@ -27,15 +27,18 @@ package de.qaware.cloud.nativ.kpad
 
 import de.qaware.cloud.nativ.kpad.launchpad.LaunchpadController
 import de.qaware.cloud.nativ.kpad.launchpad.LaunchpadMK2
+import de.qaware.cloud.nativ.kpad.leapmotion.LeapMotionController
 import org.apache.deltaspike.cdise.api.CdiContainerLoader.getCdiContainer
 import org.apache.deltaspike.core.api.provider.BeanProvider.getContextualReference
 import org.slf4j.bridge.SLF4JBridgeHandler
+import java.util.logging.Logger
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.context.Dependent
 
 /**
  * The main application class for the Cloud Launchpad.
  * K8S and Marathon (DC/OS) are supported.
+ *
  * To switch between them set -Dcluster.service to either kubernetes or marathon.
  * For additional configuration have a look at the cluster.properties file
  *
@@ -46,13 +49,14 @@ fun main(args: Array<String>) {
     SLF4JBridgeHandler.install()
 
     // this seems to be required at least under Windows
-    System.setProperty("javax.sound.midi.Transmitter", "com.sun.media.sound.MidiInDeviceProvider#Launchpad MK2");
-    System.setProperty("javax.sound.midi.Receiver", "com.sun.media.sound.MidiOutDeviceProvider#Launchpad MK2");
+    System.setProperty("javax.sound.midi.Transmitter", "com.sun.media.sound.MidiInDeviceProvider#Launchpad MK2")
+    System.setProperty("javax.sound.midi.Receiver", "com.sun.media.sound.MidiOutDeviceProvider#Launchpad MK2")
 
+    // get cluster service property or initialize default
     var clusterService = System.getProperty("cluster.service")
-    if(clusterService == null) {
-        System.setProperty("cluster.service", "kubernetes")
+    if (clusterService == null) {
         clusterService = "kubernetes"
+        System.setProperty("cluster.service", clusterService)
     }
 
     // get the current CDI container
@@ -72,7 +76,6 @@ fun main(args: Array<String>) {
     controller.write(clusterService)
     controller.init()
 
-    /*
     val logger = Logger.getLogger(LeapMotionController::class.java.name)
     val leap = getContextualReference(LeapMotionController::class.java)
     if (leap.enabled) {
@@ -83,7 +86,6 @@ fun main(args: Array<String>) {
     } else {
         logger.warning("No Leap Motion support.")
     }
-    */
 
     // ensure we shutdown nicely on exit
     Runtime.getRuntime().addShutdownHook(Thread() { cdiContainer.shutdown() })

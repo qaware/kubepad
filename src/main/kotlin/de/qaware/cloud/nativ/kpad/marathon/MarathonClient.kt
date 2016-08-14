@@ -37,36 +37,36 @@ import javax.enterprise.context.ApplicationScoped
 interface MarathonClient {
 
     @GET("v2/apps?embed=apps.deployments")
-    fun listApps() : Call<Apps>
+    fun listApps(): Call<Apps>
 
     @PUT("v2/apps/{app_id}")
-    fun updateApp(@Path("app_id") appId : String, @Body app : Any) : Call<UpdateResult>
+    fun updateApp(@Path("app_id") appId: String, @Body app: Any): Call<UpdateResult>
 
     @GET("v2/deployments")
-    fun listDeployments() : Call<List<Deployment>>
+    fun listDeployments(): Call<List<Deployment>>
 
-    data class App (
-            val id : String,
-            val instances : Int,
-            val deployments : List<Deployment>,
+    data class App(
+            val id: String,
+            val instances: Int,
+            val deployments: List<Deployment>,
             val labels: Map<String, String>
     )
 
-    data class Apps (val apps : List<App>)
+    data class Apps(val apps: List<App>)
 
-    data class ScalingUpdate (val instances : Int)
+    data class ScalingUpdate(val instances: Int)
 
-    data class UpdateResult (val deploymentId : String)
+    data class UpdateResult(val deploymentId: String)
 
-    data class Deployment (
-            val id : String,
-            val affectedApps : List<String>?,
-            val currentActions : List<Action>?
+    data class Deployment(
+            val id: String,
+            val affectedApps: List<String>?,
+            val currentActions: List<Action>?
     )
 
-    data class Action (
-            val action : ActionType,
-            val app : String
+    data class Action(
+            val action: ActionType,
+            val app: String
     )
 
     enum class ActionType {

@@ -43,24 +43,9 @@ open class MarathonProducer @Inject constructor(@ConfigProperty(name = "marathon
                                                 @ConfigProperty(name = "marathon.accessTokenFile")
                                                 private val accessTokenFile: String) {
 
-    /*
-    var wireMockServer : WireMockServer? = null
-
-    @PostConstruct
-    fun init() {
-        wireMockServer = WireMockServer()
-        wireMockServer!!.start()
-    }
-
-    @PreDestroy
-    fun stop() {
-        wireMockServer!!.stop()
-    }
-    */
-
     @Produces
     @Default
-    open fun marathonClient() : MarathonClient {
+    open fun marathonClient(): MarathonClient {
         val accessToken = Files.toString(File(accessTokenFile), Charsets.UTF_8)
 
         val client = OkHttpClient.Builder()

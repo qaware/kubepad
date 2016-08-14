@@ -63,7 +63,8 @@ dependencies {
 
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-    //compile 'com.github.mohitsoni:marathon-client:0.4.2'
+
+    compile 'com.google.guava:guava:19.0'
 
     compile ':LeapJava:2.3.1'
 
@@ -73,7 +74,7 @@ dependencies {
     compile 'javax.enterprise:cdi-api:2.0-EDR1'
 
     runtime "org.slf4j:jcl-over-slf4j:$slf4jVersion"
-    compile "org.slf4j:jul-to-slf4j:$slf4jVersion"
+    runtime "org.slf4j:jul-to-slf4j:$slf4jVersion"
     runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.5'
     runtime 'org.apache.logging.log4j:log4j-core:2.5'
     runtime 'org.apache.deltaspike.cdictrl:deltaspike-cdictrl-weld:1.5.4'

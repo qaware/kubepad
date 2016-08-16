@@ -58,4 +58,9 @@ interface Cluster {
      */
     fun scale(appIndex: Int, replicas: Int)
 
+    /**
+     * Clears the local list of apps. This will cause all apps to be readded.
+     */
+    fun reset()
+
 }

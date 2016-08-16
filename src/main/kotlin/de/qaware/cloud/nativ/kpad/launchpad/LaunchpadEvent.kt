@@ -65,6 +65,11 @@ data class LaunchpadEvent constructor(val switch: Switch?,
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Pulse
 
+    @Qualifier
+    @Target(AnnotationTarget.TYPE, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.FIELD)
+    @Retention(AnnotationRetention.RUNTIME)
+    annotation class Reset
+
     companion object {
         /**
          * Factory method for light events.
@@ -75,5 +80,10 @@ data class LaunchpadEvent constructor(val switch: Switch?,
          * Factory method for text events.
          */
         fun text(message: String, color: Color) = LaunchpadEvent(message, color)
+
+        /**
+         * Factory method for reset events.
+         */
+        fun reset() = LaunchpadEvent(Switch.OFF, null, null, Color.NONE)
     }
 }

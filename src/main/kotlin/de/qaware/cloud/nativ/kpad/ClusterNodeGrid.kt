@@ -115,6 +115,14 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
         }
     }
 
+    open fun startAll() {
+        0.until(8).forEach {
+            if (cluster.replicas(it) == 0) {
+                scale(it, 1)
+            }
+        }
+    }
+
     /**
      * Scale the deployment at given row to number of specified replicas.
      *
@@ -138,6 +146,12 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
                 node.activate().update(ClusterNode.Phase.Pending)
                 starting(node)
             }
+        }
+    }
+
+    open fun reset() {
+        if (initialized) {
+            cluster.reset()
         }
     }
 

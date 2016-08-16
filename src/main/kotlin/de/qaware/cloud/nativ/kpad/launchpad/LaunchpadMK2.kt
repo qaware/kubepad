@@ -122,7 +122,7 @@ open class LaunchpadMK2 @Inject constructor(private val transmitter: Transmitter
      * Reset the Launchpad and turn off all the buttons.
      */
     @PreDestroy
-    open fun reset() {
+    open fun reset(@Observes @LaunchpadEvent.Reset event: LaunchpadEvent) {
         Button.values().forEach { it.off(receiver) }
 
         IntRange(0, 7).forEach { r ->
@@ -189,8 +189,16 @@ open class LaunchpadMK2 @Inject constructor(private val transmitter: Transmitter
     enum class Button(override val command: Int, override val id: Int, override val row: Int) : Switchable {
         CURSOR_UP(176, 104, 8), CURSOR_DOWN(176, 105, 8),
         CURSOR_LEFT(176, 106, 8), CURSOR_RIGHT(176, 107, 8),
-        SESSION(176, 108, 8), USER_1(176, 109, 8),
-        USER_2(176, 110, 8), MIXER(176, 111, 8),
+
+        /** Stop all */
+        SESSION(176, 108, 8),
+        /** Start all */
+        USER_1(176, 109, 8),
+        /** Reload all apps */
+        USER_2(176, 110, 8),
+        /** Start snake game */
+        MIXER(176, 111, 8),
+
         RECORD(144, 19, 0), SOLO(144, 29, 1),
         MUTE(144, 39, 2), STOP(144, 49, 3),
         SEND_B(144, 59, 4), SEND_A(144, 69, 5),
@@ -242,16 +250,13 @@ open class LaunchpadMK2 @Inject constructor(private val transmitter: Transmitter
             /**
              * Create a Square from the ID.
              */
-            fun from(id: Int) = when (id) {
-                in 11..18 -> Square(0, id - 11)
-                in 21..28 -> Square(1, id - 21)
-                in 31..38 -> Square(2, id - 31)
-                in 41..48 -> Square(3, id - 41)
-                in 51..58 -> Square(4, id - 51)
-                in 61..68 -> Square(5, id - 61)
-                in 71..78 -> Square(6, id - 71)
-                in 81..88 -> Square(7, id - 81)
-                else -> throw UnsupportedOperationException("$id is not a Square.")
+            fun from(id: Int): Square {
+                val row = id / 10 - 1
+                val col = id - row * 10 - 11
+                if (row !in 0..7 || col !in 0..7) {
+                    throw UnsupportedOperationException("$id is not a Square.")
+                }
+                return Square(row, col)
             }
         }
     }

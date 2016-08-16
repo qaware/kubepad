@@ -138,6 +138,13 @@ open class MarathonCluster @Inject constructor(private val client: MarathonClien
         return apps[appIndex]?.labels ?: emptyMap()
     }
 
+    override fun reset() {
+        0.until(8).forEach {
+            apps[it] = null
+            deploying[it] = false
+        }
+    }
+
     private fun watch() {
         scheduler.scheduleAtFixedRate({
             try {

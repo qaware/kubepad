@@ -26,6 +26,7 @@
 package de.qaware.cloud.nativ.kpad
 
 import de.qaware.cloud.nativ.kpad.launchpad.LaunchpadController
+import de.qaware.cloud.nativ.kpad.launchpad.LaunchpadEvent
 import de.qaware.cloud.nativ.kpad.launchpad.LaunchpadMK2
 import de.qaware.cloud.nativ.kpad.leapmotion.LeapMotionController
 import org.apache.deltaspike.cdise.api.CdiContainerLoader.getCdiContainer
@@ -70,7 +71,7 @@ fun main(args: Array<String>) {
 
     // reset any buttons of the Launchpad
     val launchpad = getContextualReference(LaunchpadMK2::class.java)
-    launchpad.reset()
+    launchpad.reset(LaunchpadEvent.reset())
 
     val controller = getContextualReference(LaunchpadController::class.java)
     controller.write(clusterService)

@@ -127,6 +127,19 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
         events.fire(ClusterAppEvent(appIndex, replicas, labels(deployment), ClusterAppEvent.Type.DEPLOYED))
     }
 
+    override fun reset() {
+        0.until(8).forEach {
+            deployments[it] = null
+            names[it] = null
+        }
+
+        val operation = client.extensions().deployments().inNamespace(namespace)
+        val list = operation.list()
+        list?.items?.forEach {
+            addDepolyment(it)
+        }
+    }
+
     override fun eventReceived(action: Watcher.Action?, resource: Deployment?) {
         when (action) {
             Watcher.Action.ADDED -> {

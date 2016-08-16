@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "PUT",
-    "url": "/v2/apps/testapp",
+    "url": "/service/marathon/v2/apps/testapp",
     "bodyPatterns": [
       {
         "matchesJsonPath": "$.instances"

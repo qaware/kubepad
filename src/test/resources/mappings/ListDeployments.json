@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/v2/deployments"
+    "url": "/service/marathon/v2/deployments"
   },
   "response": {
     "status": 200,

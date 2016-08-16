@@ -24,20 +24,17 @@
 package de.qaware.cloud.nativ.kpad.marathon
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class MarathonClientTest {
     val port = 8089
 
-    val retrofit = Retrofit.Builder()
-            .baseUrl("http://localhost:$port")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    val client = retrofit.create(MarathonClient::class.java)
+    var client: MarathonClient? = null
 
     val testApp = MarathonClient.App(
             id = "testapp",
@@ -60,12 +57,22 @@ class MarathonClientTest {
     @Rule @JvmField
     val wireMockRule = WireMockRule(port)
 
+    @Before
+    fun init() {
+        val dcosConfigUri = javaClass.classLoader.getResource(".dcos/dcos.toml")?.toURI()
+        assertNotNull(dcosConfigUri, "DC/OS test config not found in resources directory!")
+        val dcosConfigFilePath = File(dcosConfigUri).absolutePath
+        println(dcosConfigFilePath)
+        client = MarathonProducer(dcosConfigFilePath).marathonClient()
+        assertNotNull(client, "Marathon client was not created!")
+    }
+
     @Test
     fun listAppsTest() {
-        val apps = client.listApps().execute().body().apps
+        val apps = client!!.listApps().execute().body().apps
         apps.forEach { println("Found Marathon app with id ${it.id}") }
 
-        val deployments = client.listDeployments().execute().body()
+        val deployments = client!!.listDeployments().execute().body()
         deployments.forEach { println("Found Marathon deployment with id ${it.id}") }
 
         val appsWithDeployments = apps.map { app ->
@@ -86,8 +93,8 @@ class MarathonClientTest {
     @Test
     fun updateAppTest() {
         println("Scaling app ${testApp.id} to 4 instances")
-        val result = client.updateApp(testApp.id, MarathonClient.ScalingUpdate(4)).execute().body()
-        val deployment = client.listDeployments().execute().body().findLast { it.id.equals(result.deploymentId) }
+        val result = client!!.updateApp(testApp.id, MarathonClient.ScalingUpdate(4)).execute().body()
+        val deployment = client!!.listDeployments().execute().body().findLast { it.id.equals(result.deploymentId) }
         println("Scaling successful. Created depolyment ${deployment}")
 
         assertEquals(deployment, testApp.deployments.first(),

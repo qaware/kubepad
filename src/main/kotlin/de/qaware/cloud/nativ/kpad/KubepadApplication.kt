@@ -75,7 +75,7 @@ fun main(args: Array<String>) {
 
     val controller = getContextualReference(LaunchpadController::class.java)
     controller.write(clusterService)
-    controller.init()
+    controller.reset()
 
     val logger = Logger.getLogger(LeapMotionController::class.java.name)
     val leap = getContextualReference(LeapMotionController::class.java)

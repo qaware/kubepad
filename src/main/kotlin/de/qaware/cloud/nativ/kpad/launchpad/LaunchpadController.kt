@@ -42,6 +42,7 @@ import javax.inject.Inject
  */
 @ApplicationScoped
 open class LaunchpadController @Inject constructor(private val grid: ClusterNodeGrid,
+                                                   private val snakeGame: SnakeGame,
                                                    private val launchpad: Event<LaunchpadEvent>,
                                                    private val nodes: Event<ClusterNodeEvent>,
                                                    private val logger: Logger) {
@@ -54,7 +55,10 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
      * @param event the event data
      */
     open fun onButtonPressed(@Observes @SwitchableEvent.Pressed event: SwitchableEvent) {
-        logger.debug("{} pressed.", event.switchable)
+        if (snakeGame.running())
+            return
+
+        logger.debug("{} pressed. {}", event.switchable, snakeGame.running())
 
         val rows = grid.rows()
         val contained = activeRow in rows
@@ -92,14 +96,24 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
                     }
                 }
             }
-        // cycle through the four bank buttons
+
             Button.SESSION -> {
                 grid.stopAll()
             }
 
-            Button.USER_1 , Button.USER_2, Button.MIXER -> {
-                light(Switch.ON, event.switchable, PURPLE)
+            Button.USER_1 -> {
+                grid.startAll()
             }
+
+            Button.USER_2 -> {
+                reset()
+            }
+
+            Button.MIXER -> { //handled by snake game
+                logger.debug("Start Game!")
+                Thread(snakeGame).start()
+            }
+
         // direct selection of active row button
             Button.VOLUME, Button.PAN, Button.SEND_A, Button.SEND_B,
             Button.STOP, Button.MUTE, Button.SOLO, Button.RECORD -> {
@@ -165,23 +179,27 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
                 .fire(ClusterNodeEvent(square.row, square.column))
     }
 
+    open fun reset() {
+        resetLaunchpad()
+        initActionButtons()
+        grid.reset()
+    }
+
     /**
      * Called when we have a button released event.
      *
      * @param event the event data
      */
     open fun onButtonReleased(@Observes @SwitchableEvent.Released event: SwitchableEvent) {
+        if (snakeGame.running())
+            return
+
         logger.debug("{} released.", event.switchable)
 
         when (event.switchable) {
             Button.CURSOR_UP, Button.CURSOR_DOWN,
             Button.CURSOR_LEFT, Button.CURSOR_RIGHT -> {
                 light(Switch.ON, event.switchable, BLUE)
-            }
-            Button.USER_1, Button.USER_2, Button.MIXER -> {
-                light(Switch.OFF, Button.USER_1)
-                light(Switch.OFF, Button.USER_2)
-                light(Switch.OFF, Button.MIXER)
             }
         }
     }
@@ -267,10 +285,10 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
     }
 
     /**
-     * Initialze the controller with its default state.
+     * Initialize the action buttons (top row).
      */
-    open fun init() {
-        logger.info("Initializing launchpad default state.")
+    private fun initActionButtons() {
+        logger.info("Initializing action buttons.")
 
         light(Switch.ON, Button.CURSOR_UP, BLUE)
         light(Switch.ON, Button.CURSOR_DOWN, BLUE)
@@ -278,20 +296,9 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
         light(Switch.ON, Button.CURSOR_RIGHT, BLUE)
 
         light(Switch.ON, Button.SESSION, RED)
-
-        // and we need to set the default state
-        // for the cluster node grid
-        val rows = grid.rows()
-        rows.forEach {
-            val button = Button.right(it)
-            light(Switch.ON, button, PURPLE)
-        }
-
-        if (rows.size > 0) {
-            val button = Button.right(rows.first())
-            light(Switch.ON, button, BLUE)
-            activeRow = button.row
-        }
+        light(Switch.ON, Button.USER_1, LIGHT_GREEN)
+        light(Switch.ON, Button.USER_2, YELLOW)
+        light(Switch.ON, Button.MIXER, LIGHT_BLUE)
     }
 
     /**
@@ -320,5 +327,10 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
     private fun text(message: String, color: LaunchpadMK2.Color) {
         val event = LaunchpadEvent.text(message, color)
         launchpad.select(object : AnnotationLiteral<LaunchpadEvent.Text>() {}).fire(event)
+    }
+
+    private fun resetLaunchpad() {
+        val event = LaunchpadEvent.reset()
+        launchpad.select(object : AnnotationLiteral<LaunchpadEvent.Reset>() {}).fire(event)
     }
 }

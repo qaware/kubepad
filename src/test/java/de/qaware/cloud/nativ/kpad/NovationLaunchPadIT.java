@@ -121,7 +121,7 @@ public class NovationLaunchPadIT {
             final int bf = b;
             transmitter.setReceiver(simpleReceiver(id -> {
                 int col = id / 10 - 1;
-                int row = id - ((col + 1) * 10 + 1);
+                int row = id - col * 10 - 11;
                 int color = (row + (8 - col - 1) * 8) + bf * 64;
                 System.out.println("Color " + color);
             }));

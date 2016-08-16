@@ -44,25 +44,18 @@ open class MarathonProducer @Inject constructor(@ConfigProperty(name = "dcos.con
     @Produces
     @Default
     open fun marathonClient(): MarathonClient {
-        val dcosConfigFile = if(!configPath.isNullOrEmpty()) {
-            File(configPath)
-        } else {
-            val homeDirectory = System.getProperty("user.home")
-            File(homeDirectory + "/.dcos/dcos.toml")
-        }
-
-        val dcosConfig = Toml().read(dcosConfigFile)
-        val apiEndpoint = dcosConfig.getString("core.dcos_url") + "service/marathon/"
-        val accessToken = dcosConfig.getString("core.dcos_acs_token")
+        val dcosConfigFile = getDcosConfigFile()
+        val dcosConfig = getDcosConfig(dcosConfigFile)
 
         val client = OkHttpClient.Builder()
                 .addInterceptor { chain ->
                     val req = chain.request().newBuilder()
-                            .header("Authorization", "token=$accessToken")
+                            .header("Authorization", "token=$dcosConfig.accessToken")
                             .build()
                     chain.proceed(req)
                 }.build()
 
+        val apiEndpoint = dcosConfig.url + "service/marathon/"
         val retrofit = Retrofit.Builder()
                 .baseUrl(apiEndpoint)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -72,4 +65,21 @@ open class MarathonProducer @Inject constructor(@ConfigProperty(name = "dcos.con
         return retrofit.create(MarathonClient::class.java)
     }
 
+    private fun getDcosConfig(dcosConfigFile: File): DcosConfig {
+        val dcosConfig = Toml().read(dcosConfigFile)
+        val url = dcosConfig.getString("core.dcos_url")
+        val accessToken = dcosConfig.getString("core.dcos_acs_token")
+        return DcosConfig(url, accessToken)
+    }
+
+    private fun getDcosConfigFile(): File {
+        if (configPath.isNullOrEmpty()) {
+            val homeDirectory = System.getProperty("user.home")
+            return File(homeDirectory, ".dcos/dcos.toml")
+        } else {
+            return File(configPath)
+        }
+    }
+
+    private data class DcosConfig(val url: String, val accessToken: String)
 }

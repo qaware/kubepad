@@ -12,7 +12,9 @@ target/
 .gradle/
 build/
 
-kubernetes/
+!kubernetes/
+!src/main/kotlin/de/qaware/cloud/nativ/kpad/kubernetes/
+kubernetes/*
 kubernetes.tar.gz
 
 # OSX

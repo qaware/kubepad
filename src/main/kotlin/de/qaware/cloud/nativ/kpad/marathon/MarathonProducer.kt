@@ -23,7 +23,7 @@
  */
 package de.qaware.cloud.nativ.kpad.marathon
 
-import com.google.common.io.Files
+import com.moandjiezana.toml.Toml
 import okhttp3.OkHttpClient
 import org.apache.deltaspike.core.api.config.ConfigProperty
 import retrofit2.Retrofit
@@ -38,15 +38,22 @@ import javax.inject.Inject
  * The CDI producer for the Marathon Java API.
  */
 @ApplicationScoped
-open class MarathonProducer @Inject constructor(@ConfigProperty(name = "marathon.apiEndpoint")
-                                                private val apiEndpoint: String,
-                                                @ConfigProperty(name = "marathon.accessTokenFile")
-                                                private val accessTokenFile: String) {
+open class MarathonProducer @Inject constructor(@ConfigProperty(name = "dcos.configPath")
+                                                private val configPath: String?) {
 
     @Produces
     @Default
     open fun marathonClient(): MarathonClient {
-        val accessToken = Files.toString(File(accessTokenFile), Charsets.UTF_8)
+        val dcosConfigFile = if(!configPath.isNullOrEmpty()) {
+            File(configPath)
+        } else {
+            val homeDirectory = System.getProperty("user.home")
+            File(homeDirectory + "/.dcos/dcos.toml")
+        }
+
+        val dcosConfig = Toml().read(dcosConfigFile)
+        val apiEndpoint = dcosConfig.getString("core.dcos_url") + "service/marathon/"
+        val accessToken = dcosConfig.getString("core.dcos_acs_token")
 
         val client = OkHttpClient.Builder()
                 .addInterceptor { chain ->

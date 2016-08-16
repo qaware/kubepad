@@ -58,7 +58,7 @@ open class MarathonCluster @Inject constructor(private val client: MarathonClien
         val newApps = client.listApps().execute().body().apps.toMutableList()
 
         apps.forEachIndexed { i, app ->
-            if (app == null) return
+            if (app == null) return@forEachIndexed
 
             val newApp = newApps.find { it.id.equals(app.id) }
 

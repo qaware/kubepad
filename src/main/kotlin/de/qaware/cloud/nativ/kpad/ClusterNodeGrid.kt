@@ -59,7 +59,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
      */
     @PostConstruct
     open fun init() {
-        logger.info("Initialize 8x8 cluster node grid.")
+        logger.debug("Initialize 8x8 cluster node grid.")
 
         grid.forEachIndexed { row, instances ->
             IntRange(0, 7).forEach { instances.add(ClusterNode(row, it)) }
@@ -81,7 +81,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
      * @param event the node event data
      */
     open fun start(@Observes @ClusterNodeEvent.Start event: ClusterNodeEvent) {
-        logger.info("Start cluster node {}", event)
+        logger.debug("Start cluster node {}", event)
 
         val node = grid[event.row][event.column]
         val running = cluster.replicas(event.row)
@@ -97,7 +97,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
      * @param event the node event data
      */
     open fun stop(@Observes @ClusterNodeEvent.Stop event: ClusterNodeEvent) {
-        logger.info("Stop cluster node {}", event)
+        logger.debug("Stop cluster node {}", event)
 
         val node = grid[event.row][event.column]
         val running = cluster.replicas(event.row)
@@ -150,7 +150,13 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
     }
 
     open fun reset() {
+        logger.info("Reloading all apps.")
         if (initialized) {
+            grid.forEach {
+                it.forEach {
+                    it.deactivate()
+                }
+            }
             cluster.reset()
         }
     }

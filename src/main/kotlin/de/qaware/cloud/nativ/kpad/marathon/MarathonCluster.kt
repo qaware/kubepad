@@ -148,7 +148,7 @@ open class MarathonCluster @Inject constructor(private val client: MarathonClien
         }
 
         logger.info("Scaling app {} to {} replicas.", app.id, replicas)
-        val result = client.updateApp(app.id, MarathonClient.ScalingUpdate(replicas)).execute()
+        val result = client.updateApp(app.id, MarathonClient.ScalingUpdate(replicas), true).execute()
 
         apps[appIndex] = app.copy(instances = replicas)
         deploying[appIndex] = true

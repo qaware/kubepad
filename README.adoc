@@ -9,26 +9,24 @@ Remote control a Kubernetes or Marathon cluster using a Novation launchpad MIDI 
 
 image::kubepad-in-action.jpg[K8S Cloud Launchpad, 400, 400]
 
-== Usage
+== Configuration
 
 First of all you need a Kubernetes or Marathon cluster. You can access a local installation as
 well as a remote master.
 
 .Kubernetes
-****
 Make sure you have the proper configuration under `˜.kube/config`.
 Additionally set your master URL and namespace in the cluster.properties file.
 Then start Kubepad with the `-Dcluster.service=kubernetes` flag.
-****
+
 
 .Marathon / DCOS
-****
-For using Kubepad with Marathon you need an API access token. You can get yours by running
-`dcos config show core.dcos_acs_token` with the DCOS CLI installed.
-Save to a file and insert the path of this file in the cluster.properties file.
-Also specify your API endpoint in the form of `http://<your-dcos-url>/service/marathon/`.
+Kubepad retrieves your URL and access token for DC/OS from a file named `dcos.toml`.
+By default this file is in the `/.dcos` folder in your home directory.
+You can overwrite its location in the `cluster.properties` file.
 Then start Kubepad with the `-Dcluster.service=marathon` flag.
-****
+
+== Usage
 
 Now you can start and use the Kubepad. Each row represents a running application, with
 the square buttons representing instances. You can start and stop an instance by
@@ -39,6 +37,24 @@ and scale the row (left and right).
 You can also use a connected leap motion to control your cluster. Perform a swipe
 gesture to scale to 5 Pods (= 5 fingers). Use key tap or screen tap gestures to move the
 row selection down or up.
+
+== Action Buttons
+
+The four buttons on the right of the top row have a special meaning:
+
+- Session (Red): Stops all apps.
+- User 1 (Green): Ensures that at least one instance is running for every app.
+- User 2 (Yellow): Reloads all apps.
+- Mixer (Blue): Switches to snake-mode. (Return by pressing the yellow button.)
+
+== Labels
+
+The appearance of apps on the launchpad can be specified with following labels:
+
+- `LAUNCHPAD_COLOR`: Sets the color for all instances of the app on the launchpad.
+  Can be either RED, ORANGE, YELLOW, LIGHT_GREEN, CYAN, LIGHT_BLUE, BLUE or PURPLE
+- `LAUNCHPAD_ROW`: Displays the app in the specified row (0-7)
+  if the row is not already assigned to another app.
 
 == References
 

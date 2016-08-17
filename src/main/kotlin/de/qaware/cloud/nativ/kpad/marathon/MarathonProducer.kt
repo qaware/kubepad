@@ -55,7 +55,9 @@ open class MarathonProducer @Inject constructor(@ConfigProperty(name = "dcos.con
                     chain.proceed(req)
                 }.build()
 
-        val apiEndpoint = dcosConfig.url + "service/marathon/"
+        val apiPath = if (dcosConfig.url.endsWith("/")) "service/marathon/" else "/service/marathon/"
+        val apiEndpoint = dcosConfig.url + apiPath
+
         val retrofit = Retrofit.Builder()
                 .baseUrl(apiEndpoint)
                 .addConverterFactory(GsonConverterFactory.create())

@@ -1,7 +1,12 @@
 {
   "request": {
     "method": "PUT",
-    "url": "/service/marathon/v2/apps/testapp",
+    "url": "/service/marathon/v2/apps/testapp?force=true",
+    "headers": {
+      "Authorization": {
+        "contains": "token="
+      }
+    },
     "bodyPatterns": [
       {
         "matchesJsonPath": "$.instances"

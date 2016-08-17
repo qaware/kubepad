@@ -1,7 +1,12 @@
 {
   "request": {
     "method": "GET",
-    "url": "/service/marathon/v2/apps?embed=apps.deployments"
+    "url": "/service/marathon/v2/apps?embed=apps.deployments",
+    "headers": {
+      "Authorization": {
+        "contains": "token="
+      }
+    }
   },
   "response": {
     "status": 200,

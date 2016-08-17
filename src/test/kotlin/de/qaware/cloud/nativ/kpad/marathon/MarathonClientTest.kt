@@ -93,7 +93,7 @@ class MarathonClientTest {
     @Test
     fun updateAppTest() {
         println("Scaling app ${testApp.id} to 4 instances")
-        val result = client!!.updateApp(testApp.id, MarathonClient.ScalingUpdate(4)).execute().body()
+        val result = client!!.updateApp(testApp.id, MarathonClient.ScalingUpdate(4), true).execute().body()
         val deployment = client!!.listDeployments().execute().body().findLast { it.id.equals(result.deploymentId) }
         println("Scaling successful. Created depolyment ${deployment}")
 

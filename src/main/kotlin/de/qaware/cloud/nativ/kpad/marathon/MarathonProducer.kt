@@ -50,7 +50,7 @@ open class MarathonProducer @Inject constructor(@ConfigProperty(name = "dcos.con
         val client = OkHttpClient.Builder()
                 .addInterceptor { chain ->
                     val req = chain.request().newBuilder()
-                            .header("Authorization", "token=$dcosConfig.accessToken")
+                            .header("Authorization", "token=${dcosConfig.accessToken}")
                             .build()
                     chain.proceed(req)
                 }.build()

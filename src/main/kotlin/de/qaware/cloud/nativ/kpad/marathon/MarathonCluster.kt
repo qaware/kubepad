@@ -55,59 +55,85 @@ open class MarathonCluster @Inject constructor(private val client: MarathonClien
     }
 
     private fun update() {
-        val newApps = client.listApps().execute().body().apps.toMutableList()
+        val response = client.listApps().execute()
 
-        apps.forEachIndexed { i, app ->
-            if (app == null) return@forEachIndexed
+        if (!response.isSuccessful) {
+            logger.error("Error while updating apps: {}", response.errorBody().string())
+            return
+        }
 
-            val newApp = newApps.find { it.id.equals(app.id) }
+        val newApps = response.body().apps.toMutableList()
 
-            if (newApp != null) { // app found in newApps
-                newApps.remove(newApp)
-                apps[i] = newApp
+        apps.indices.forEach { if (apps[it] != null) findChanges(it, newApps) }
 
-                if (deploying[i] && (newApp.deployments.count() == 0)) { // -> status changed
-                    logger.debug("App {} finished deploying", app.id)
-                    deploying[i] = false
-                    events.fire(ClusterAppEvent(i, newApp.instances, labels(i), ClusterAppEvent.Type.DEPLOYED))
-                }
+        newApps.forEach { addApp(it) }
+    }
 
-                if (app.instances < newApp.instances) { // -> scaled up
-                    logger.debug("Scaled up app {} from {} to {} replicas.", app.id, app.instances, newApp.instances)
-                    deploying[i] = true
-                    events.fire(ClusterAppEvent(i, newApp.instances, labels(i), ClusterAppEvent.Type.SCALED_UP))
-                } else if (app.instances > newApp.instances) { // -> scaled down
-                    logger.debug("Scaled down app {} from {} to {} replicas.", app.id, app.instances, newApp.instances)
-                    deploying[i] = true
-                    events.fire(ClusterAppEvent(i, newApp.instances, labels(i), ClusterAppEvent.Type.SCALED_DOWN))
-                }
-            } else { // app not found in newApps -> deleted
-                logger.debug("Deleted app {}.", apps[i]!!.id)
-                apps[i] = null
-                events.fire(ClusterAppEvent(i, 0, labels(i), ClusterAppEvent.Type.DELETED))
+    private fun addApp(newApp: MarathonClient.App) {
+        var index = apps.indexOfFirst { it == null }
+
+        if (index == -1) {
+            logger.debug("Found new app {} but could not add because all rows are occupied!", newApp.id)
+            return
+        }
+
+        if (newApp.labels.containsKey("LAUNCHPAD_ROW")) {
+            val row = newApp.labels["LAUNCHPAD_ROW"]!!.toInt()
+            if (apps.indices.contains(row) && apps[row] == null) {
+                index = row
             }
         }
 
-        newApps.forEachIndexed { i, newApp -> // newApp not (yet) in apps -> added
-            var index = apps.indexOfFirst { it == null }
+        apps[index] = newApp
+        deploying[index] = false
+        logger.debug("Added app {} at index {}.", newApp.id, index)
+        events.fire(ClusterAppEvent(index, newApp.instances, labels(index), ClusterAppEvent.Type.ADDED))
+    }
 
-            if (index == -1) {
-                logger.debug("Found new app {} but could not add because all rows are occupied!", newApp.id)
-                return@forEachIndexed
+    private fun findChanges(appIndex: Int, newApps: MutableList<MarathonClient.App>) {
+        val app = apps[appIndex]!!
+        val newApp = newApps.find { it.id.equals(app.id) }
+
+        if (newApp != null) { // app found in newApps
+            newApps.remove(newApp)
+            apps[appIndex] = newApp
+
+            if (deploying[appIndex] && (newApp.deployments.count() == 0)) { // -> status changed
+                depolyingFinished(appIndex, app, newApp)
             }
 
-            if (newApp.labels.containsKey("LAUNCHPAD_ROW")) {
-                val row = newApp.labels["LAUNCHPAD_ROW"]!!.toInt()
-                if (apps.indices.contains(row) && apps[row] == null) {
-                    index = row
-                }
+            if (app.instances < newApp.instances) { // -> scaled up
+                scaledUp(appIndex, app, newApp)
+            } else if (app.instances > newApp.instances) { // -> scaled down
+                scaledDown(appIndex, app, newApp)
             }
-
-            apps[index] = newApp
-            deploying[index] = false
-            logger.debug("Added app {} at index {}.", newApp.id, index)
-            events.fire(ClusterAppEvent(index, newApp.instances, labels(index), ClusterAppEvent.Type.ADDED))
+        } else { // app not found in newApps -> deleted
+            deleted(appIndex, app)
         }
+    }
+
+    private fun depolyingFinished(appIndex: Int, app: MarathonClient.App, newApp: MarathonClient.App) {
+        logger.debug("App {} finished deploying", app.id)
+        deploying[appIndex] = false
+        events.fire(ClusterAppEvent(appIndex, newApp.instances, labels(appIndex), ClusterAppEvent.Type.DEPLOYED))
+    }
+
+    private fun scaledUp(appIndex: Int, app: MarathonClient.App, newApp: MarathonClient.App) {
+        logger.debug("Scaled up app {} from {} to {} replicas.", app.id, app.instances, newApp.instances)
+        deploying[appIndex] = true
+        events.fire(ClusterAppEvent(appIndex, newApp.instances, labels(appIndex), ClusterAppEvent.Type.SCALED_UP))
+    }
+
+    private fun scaledDown(appIndex: Int, app: MarathonClient.App, newApp: MarathonClient.App) {
+        logger.debug("Scaled down app {} from {} to {} replicas.", app.id, app.instances, newApp.instances)
+        deploying[appIndex] = true
+        events.fire(ClusterAppEvent(appIndex, newApp.instances, labels(appIndex), ClusterAppEvent.Type.SCALED_DOWN))
+    }
+
+    private fun deleted(appIndex: Int, app: MarathonClient.App) {
+        logger.debug("Deleted app {}.", app.id)
+        apps[appIndex] = null
+        events.fire(ClusterAppEvent(appIndex, 0, labels(appIndex), ClusterAppEvent.Type.DELETED))
     }
 
     override fun appExists(appIndex: Int): Boolean = apps.indices.contains(appIndex) && apps[appIndex] != null

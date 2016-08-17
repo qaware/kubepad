@@ -84,7 +84,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
         logger.info("Start cluster node {}", event)
 
         val node = grid[event.row][event.column]
-        val running = grid[event.row].count { it.active.get() }
+        val running = cluster.replicas(event.row)
 
         node.activate().update(ClusterNode.Phase.Pending)
         starting(node)
@@ -100,7 +100,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
         logger.info("Stop cluster node {}", event)
 
         val node = grid[event.row][event.column]
-        val running = grid[event.row].count { it.active.get() }
+        val running = cluster.replicas(event.row)
 
         node.update(ClusterNode.Phase.Succeeded)
         stopping(node)

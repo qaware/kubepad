@@ -37,7 +37,7 @@ class LeapMotionListener constructor(private val launchpad: LaunchpadController,
     var connected = false
 
     override fun onConnect(controller: Controller?) {
-        logger.debug("Leap Motion device connected.")
+        logger.info("Leap Motion device connected.")
         connected = true
     }
 
@@ -81,7 +81,7 @@ class LeapMotionListener constructor(private val launchpad: LaunchpadController,
     }
 
     override fun onDisconnect(controller: Controller?) {
-        logger.debug("Leap Motion device connected.")
+        logger.debug("Leap Motion device disconnected.")
         connected = false
     }
 

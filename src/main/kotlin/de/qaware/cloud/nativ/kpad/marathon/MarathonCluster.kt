@@ -73,7 +73,7 @@ open class MarathonCluster @Inject constructor(private val client: MarathonClien
         var index = apps.indexOfFirst { it == null }
 
         if (index == -1) {
-            logger.debug("Found new app {} but could not add because all rows are occupied!", newApp.id)
+            logger.info("Found new app {} but could not add because all rows are occupied!", newApp.id)
             return
         }
 
@@ -86,7 +86,7 @@ open class MarathonCluster @Inject constructor(private val client: MarathonClien
 
         apps[index] = newApp
         deploying[index] = false
-        logger.debug("Added app {} at index {}.", newApp.id, index)
+        logger.info("Added app {} at index {}.", newApp.id, index)
         events.fire(ClusterAppEvent(index, newApp.instances, labels(index), ClusterAppEvent.Type.ADDED))
     }
 
@@ -113,25 +113,25 @@ open class MarathonCluster @Inject constructor(private val client: MarathonClien
     }
 
     private fun depolyingFinished(appIndex: Int, app: MarathonClient.App, newApp: MarathonClient.App) {
-        logger.debug("App {} finished deploying", app.id)
+        logger.info("App {} finished deploying", app.id)
         deploying[appIndex] = false
         events.fire(ClusterAppEvent(appIndex, newApp.instances, labels(appIndex), ClusterAppEvent.Type.DEPLOYED))
     }
 
     private fun scaledUp(appIndex: Int, app: MarathonClient.App, newApp: MarathonClient.App) {
-        logger.debug("Scaled up app {} from {} to {} replicas.", app.id, app.instances, newApp.instances)
+        logger.info("Scaled up app {} from {} to {} replicas.", app.id, app.instances, newApp.instances)
         deploying[appIndex] = true
         events.fire(ClusterAppEvent(appIndex, newApp.instances, labels(appIndex), ClusterAppEvent.Type.SCALED_UP))
     }
 
     private fun scaledDown(appIndex: Int, app: MarathonClient.App, newApp: MarathonClient.App) {
-        logger.debug("Scaled down app {} from {} to {} replicas.", app.id, app.instances, newApp.instances)
+        logger.info("Scaled down app {} from {} to {} replicas.", app.id, app.instances, newApp.instances)
         deploying[appIndex] = true
         events.fire(ClusterAppEvent(appIndex, newApp.instances, labels(appIndex), ClusterAppEvent.Type.SCALED_DOWN))
     }
 
     private fun deleted(appIndex: Int, app: MarathonClient.App) {
-        logger.debug("Deleted app {}.", app.id)
+        logger.info("Deleted app {}.", app.id)
         apps[appIndex] = null
         events.fire(ClusterAppEvent(appIndex, 0, labels(appIndex), ClusterAppEvent.Type.DELETED))
     }
@@ -147,7 +147,7 @@ open class MarathonCluster @Inject constructor(private val client: MarathonClien
             return
         }
 
-        logger.debug("Scaling app {} to {} replicas.", app.id, replicas)
+        logger.info("Scaling app {} to {} replicas.", app.id, replicas)
         val result = client.updateApp(app.id, MarathonClient.ScalingUpdate(replicas)).execute()
 
         apps[appIndex] = app.copy(instances = replicas)

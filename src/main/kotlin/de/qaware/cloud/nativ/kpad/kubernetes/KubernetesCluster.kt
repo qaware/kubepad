@@ -54,7 +54,7 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
 
     @PostConstruct
     open fun init() {
-        logger.debug("Connect to Kubernetes master {}.", client.masterUrl)
+        logger.info("Connect to Kubernetes master {}.", client.masterUrl)
         val operation = client.extensions().deployments().inNamespace(namespace)
         val list = operation.list()
         list?.items?.forEach {
@@ -84,7 +84,7 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
         var index = deployments.indexOfFirst { it == null }
 
         if (index == -1) {
-            logger.debug("Found new deployment {} but could not add because all rows are occupied.", name)
+            logger.info("Found new deployment {} but could not add because all rows are occupied.", name)
             return
         }
 
@@ -98,7 +98,7 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
 
         deployments[index] = deployment
         names[index] = name
-        logger.debug("Added depolyment {} at index {}.", name, index)
+        logger.info("Added depolyment {} at index {}.", name, index)
         events.fire(ClusterAppEvent(index, replicas(index), labels(deployment), ClusterAppEvent.Type.ADDED))
     }
 
@@ -114,7 +114,7 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
         val deployment = deployments[appIndex]
         val name = KubernetesHelper.getName(deployment)
 
-        logger.debug("Scaling deployment {} to {} replicas.",
+        logger.info("Scaling deployment {} to {} replicas.",
                 KubernetesHelper.getName(deployment), replicas)
 
         synchronized(client) {
@@ -157,17 +157,17 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
                 val newReplicas = resource?.spec?.replicas ?: 0
 
                 if (oldReplicas < newReplicas) {
-                    logger.debug("Scaled up deployment {} from {} to {} replicas", name, oldReplicas, newReplicas)
+                    logger.info("Scaled up deployment {} from {} to {} replicas", name, oldReplicas, newReplicas)
                     events.fire(ClusterAppEvent(index, newReplicas, labels(resource), ClusterAppEvent.Type.SCALED_UP))
                 } else if (oldReplicas > newReplicas) {
-                    logger.debug("Scaled down deployment {} from {} to {} replicas", name, oldReplicas, newReplicas)
+                    logger.info("Scaled down deployment {} from {} to {} replicas", name, oldReplicas, newReplicas)
                     events.fire(ClusterAppEvent(index, newReplicas, labels(resource), ClusterAppEvent.Type.SCALED_DOWN))
                 }
             }
 
             Watcher.Action.DELETED -> {
                 val name = KubernetesHelper.getName(resource)
-                logger.debug("Deleted deployment {}.", name)
+                logger.info("Deleted deployment {}.", name)
 
                 val index = names.indexOf(name)
                 deployments[index] = null

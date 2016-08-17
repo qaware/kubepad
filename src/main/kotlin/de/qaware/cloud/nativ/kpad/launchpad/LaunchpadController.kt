@@ -58,7 +58,7 @@ open class LaunchpadController @Inject constructor(private val grid: ClusterNode
         if (snakeGame.running())
             return
 
-        logger.debug("{} pressed. {}", event.switchable, snakeGame.running())
+        logger.debug("{} pressed", event.switchable)
 
         val rows = grid.rows()
         val contained = activeRow in rows

@@ -74,18 +74,21 @@ fun main(args: Array<String>) {
     launchpad.reset(LaunchpadEvent.reset())
 
     val controller = getContextualReference(LaunchpadController::class.java)
-    controller.write(clusterService)
+    //controller.write(clusterService)
     controller.reset()
 
-    val logger = Logger.getLogger(LeapMotionController::class.java.name)
-    val leap = getContextualReference(LeapMotionController::class.java)
-    if (leap.enabled) {
-        logger.info("Leap Motion support enabled.")
-        if (leap.connected) {
-            logger.info("Leap Motion connected. Use gestures to control Kubernetes.")
+    val leapmotionEnabled = System.getProperty("leapmotion.enabled")
+    if (leapmotionEnabled != null) {
+        val logger = Logger.getLogger(LeapMotionController::class.java.name)
+        val leap = getContextualReference(LeapMotionController::class.java)
+        if (leap.enabled) {
+            logger.info("Leap Motion support enabled.")
+            if (leap.connected) {
+                logger.info("Leap Motion connected. Use gestures to control Kubernetes.")
+            }
+        } else {
+            logger.warning("No Leap Motion support.")
         }
-    } else {
-        logger.warning("No Leap Motion support.")
     }
 
     // ensure we shutdown nicely on exit

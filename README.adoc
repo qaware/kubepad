@@ -34,10 +34,6 @@ directly pressing a square button. You can also select a row by pressing the but
 the right hand side. The cursors at the top can also be used to select the row (up and down)
 and scale the row (left and right).
 
-You can also use a connected leap motion to control your cluster. Perform a swipe
-gesture to scale to 5 Pods (= 5 fingers). Use key tap or screen tap gestures to move the
-row selection down or up.
-
 == Action Buttons
 
 The four buttons on the right of the top row have a special meaning:
@@ -55,6 +51,13 @@ The appearance of apps on the launchpad can be specified with following labels:
   Can be either RED, ORANGE, YELLOW, LIGHT_GREEN, CYAN, LIGHT_BLUE, BLUE or PURPLE
 - `LAUNCHPAD_ROW`: Displays the app in the specified row (0-7)
   if the row is not already assigned to another app.
+
+== Leap Motion
+
+You can also use a connected leap motion to control your cluster.
+To enable this feature add the `-Dleapmotion.enabled` flag and point `-Djava.library.path` to your Leap motion libs.
+Perform a swipe gesture to scale to 5 Pods (= 5 fingers). Use key tap or screen tap gestures to move the
+row selection down or up.
 
 == References
 

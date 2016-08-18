@@ -25,6 +25,7 @@ package de.qaware.cloud.nativ.kpad.marathon
 
 import retrofit2.Call
 import retrofit2.http.*
+import java.util.*
 import javax.enterprise.context.ApplicationScoped
 
 /**
@@ -39,6 +40,12 @@ interface MarathonClient {
     @PUT("v2/apps/{app_id}")
     fun updateApp(@Path("app_id") appId: String, @Body app: Any, @Query("force") force: Boolean): Call<UpdateResult>
 
+    @GET("v2/apps/{app_id}/tasks")
+    fun listTasksOfApp(@Path("app_id") appId: String): Call<Tasks>
+
+    @GET("v2/tasks")
+    fun listTasks(@Query("status") status: String = ""): Call<Tasks>
+
     @GET("v2/deployments")
     fun listDeployments(): Call<List<Deployment>>
 
@@ -50,6 +57,10 @@ interface MarathonClient {
     data class ScalingUpdate(val instances: Int)
 
     data class UpdateResult(val deploymentId: String)
+
+    data class Tasks(val tasks: List<Task>)
+
+    data class Task(val id: String, val appId: String, val stagedAt: Date, val startedAt: Date)
 
     data class Deployment(val id: String, val affectedApps: List<String>?, val currentActions: List<Action>?)
 

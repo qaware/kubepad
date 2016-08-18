@@ -23,6 +23,7 @@
  */
 package de.qaware.cloud.nativ.kpad.marathon
 
+import com.google.gson.GsonBuilder
 import com.moandjiezana.toml.Toml
 import okhttp3.OkHttpClient
 import org.apache.deltaspike.core.api.config.ConfigProperty
@@ -60,7 +61,7 @@ open class MarathonProducer @Inject constructor(@ConfigProperty(name = "dcos.con
 
         val retrofit = Retrofit.Builder()
                 .baseUrl(apiEndpoint)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(createGsonConverterFactory())
                 .client(client)
                 .build()
 
@@ -81,6 +82,13 @@ open class MarathonProducer @Inject constructor(@ConfigProperty(name = "dcos.con
         } else {
             return File(configPath)
         }
+    }
+
+    private fun createGsonConverterFactory(): GsonConverterFactory {
+        val gson = GsonBuilder()
+                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                .create()
+        return GsonConverterFactory.create(gson)
     }
 
     private data class DcosConfig(val url: String, val accessToken: String)

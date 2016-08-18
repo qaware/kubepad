@@ -64,7 +64,19 @@ open class MarathonCluster @Inject constructor(private val client: MarathonClien
 
         val newApps = response.body().apps.toMutableList()
 
-        apps.indices.forEach { if (apps[it] != null) findChanges(it, newApps) }
+        apps.forEachIndexed { appIndex, app ->
+            if (app == null)
+                return@forEachIndexed
+
+            val newApp = newApps.find { it.id.equals(app.id) }
+            if (newApp != null) { // app found in newApps
+                newApps.remove(newApp)
+                apps[appIndex] = newApp
+                findChanges(appIndex, app, newApp)
+            } else { // app not found in newApps -> deleted
+                deleted(appIndex, app)
+            }
+        }
 
         newApps.forEach { addApp(it) }
     }
@@ -90,26 +102,33 @@ open class MarathonCluster @Inject constructor(private val client: MarathonClien
         events.fire(ClusterAppEvent(index, newApp.instances, labels(index), ClusterAppEvent.Type.ADDED))
     }
 
-    private fun findChanges(appIndex: Int, newApps: MutableList<MarathonClient.App>) {
-        val app = apps[appIndex]!!
-        val newApp = newApps.find { it.id.equals(app.id) }
-
-        if (newApp != null) { // app found in newApps
-            newApps.remove(newApp)
-            apps[appIndex] = newApp
-
-            if (deploying[appIndex] && (newApp.deployments.count() == 0)) { // -> status changed
-                depolyingFinished(appIndex, app, newApp)
+    private fun findChanges(appIndex: Int, oldApp: MarathonClient.App, newApp: MarathonClient.App) {
+        if (deploying[appIndex] && (newApp.deployments.count() == 0)) { // -> depolying finished
+            if (isStaging(newApp)) {
+                logger.info("App {} finished deploying, but still has staging tasks", newApp.id)
+            } else {
+                depolyingFinished(appIndex, oldApp, newApp)
             }
-
-            if (app.instances < newApp.instances) { // -> scaled up
-                scaledUp(appIndex, app, newApp)
-            } else if (app.instances > newApp.instances) { // -> scaled down
-                scaledDown(appIndex, app, newApp)
-            }
-        } else { // app not found in newApps -> deleted
-            deleted(appIndex, app)
         }
+
+        if (oldApp.instances < newApp.instances) { // -> scaled up
+            scaledUp(appIndex, oldApp, newApp)
+        } else if (oldApp.instances > newApp.instances) { // -> scaled down
+            scaledDown(appIndex, oldApp, newApp)
+        }
+    }
+
+    private fun isStaging(app: MarathonClient.App): Boolean {
+        val response = client.listTasks("staging").execute()
+
+        if (!response.isSuccessful) {
+            logger.error("Error while updating apps: {}", response.errorBody().string())
+            return false
+        }
+
+        val tasks = response.body().tasks
+        logger.info("Staging tasks: " + tasks.toString())
+        return tasks.any { it.appId.equals(app.id) }
     }
 
     private fun depolyingFinished(appIndex: Int, app: MarathonClient.App, newApp: MarathonClient.App) {

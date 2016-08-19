@@ -22,7 +22,7 @@ deploy:
   provider: releases
   api_key:
     secure: c/Q8oL//uR1df5vZcl2jlKqc+hCea6BFjmNQPyrQgomimFmeP2WlogjO4bnLSEMlrRf0gNCkIs4/Vp9RJaAepB/ebGHQWVvWYPLZnVB4PnF5PwrssljKcGzSLCP1FtvD4iG5v47hKgWIUejMAlSYzDAwvb8sxws+06PpIpP50Nar6oQ86zFx3blb8jx1000StAGW/2X7KHqCqbFfJ1aZZnnn6f1p5aUjaaePVE9nMgvFXL3SGALMRAv/CtFZ8UFW1pAztSKzrpHdVHXTrmp8faorj1tCfwl30zogteMnBNCg2Olu34+ngMO+w/R/ajhdaCpExVTs6k2QCDXrqJb3uwU+ULULfLBR+GyRirF0b2jO5emU4FQlyeWVipaQjfjiXJsaIy+48AVFUgNcNQYRyXfXA3T1OPQLuJTiuiYE0Dnc3ZCMty73gaOwUjPI/uBmXxmIzUk/1oWzWuUpM6dWr45gekiQ/apf5EfXp9W21CpcfGQGndr8+cl79wLOuuc1IwIE0WFO1FyMMVrLqK9y6FUda4P1U1M30J2LCJ33OU/32SCM4QzLvRdXDGmv2oR52mXKO76/0srBVbsdx4CLXDabOrZDqT4wycuoo7Mtj2jgn9lVw24u3v7z3p+xnJS8mlz2k14suD+x3k5AESal3cv1s2NjgbWoICGebgJeH/E=
-  file: ./build/distributions/kubepad-1.0.1.zip
+  file: ./build/distributions/kubepad-1.1.0.zip
   skip_cleanup: true
   on:
     tags: true

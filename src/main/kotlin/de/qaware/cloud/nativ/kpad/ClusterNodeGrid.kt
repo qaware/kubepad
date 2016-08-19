@@ -157,6 +157,7 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
                     it.deactivate()
                 }
             }
+            colors.indices.forEach { colors[it] = LaunchpadMK2.Color.values()[it + 1] }
             cluster.reset()
         }
     }

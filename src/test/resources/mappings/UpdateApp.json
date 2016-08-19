@@ -1,0 +1,25 @@
+{
+  "request": {
+    "method": "PUT",
+    "url": "/service/marathon/v2/apps/testapp?force=true",
+    "headers": {
+      "Authorization": {
+        "contains": "token="
+      }
+    },
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$.instances"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "deploymentId": "testapp-d0"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

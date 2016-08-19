@@ -1,0 +1,5 @@
+[core]
+dcos_acs_token = "access-token"
+dcos_url = "http://localhost:8089/"
+reporting = true
+timeout = 5

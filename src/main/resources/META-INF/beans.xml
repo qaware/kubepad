@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns="http://xmlns.jcp.org/xml/ns/javaee"
         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
                       http://xmlns.jcp.org/xml/ns/javaee/beans_1_1.xsd"
@@ -9,8 +8,8 @@
     <!-- -Dorg.apache.deltaspike.ProjectStage=Development -->
     <!--
     <alternatives>
-        <class>de.qaware.cloud.nativ.k8s.control.LoggingReceiver</class>
-        <class>de.qaware.cloud.nativ.k8s.control.LoggingTransmitter</class>
+        <class>de.qaware.cloud.nativ.kpad.logging.LoggingReceiver</class>
+        <class>de.qaware.cloud.nativ.kpad.logging.LoggingTransmitter</class>
     </alternatives>
     -->
 

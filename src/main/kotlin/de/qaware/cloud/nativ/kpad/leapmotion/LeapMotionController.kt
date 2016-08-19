@@ -39,7 +39,7 @@ import javax.inject.Inject
  * wiring resulted in strange NullPointerExceptions.
  */
 @ApplicationScoped
-open class LeapMotionController @Inject constructor(private val launchpad: LaunchpadController,
+open class LeapMotionController @Inject constructor(launchpad: LaunchpadController,
                                                     private val logger: Logger) {
 
     private lateinit var controller: Controller

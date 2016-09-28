@@ -74,7 +74,7 @@ fun main(args: Array<String>) {
     launchpad.reset(LaunchpadEvent.reset())
 
     val controller = getContextualReference(LaunchpadController::class.java)
-    //controller.write(clusterService)
+    controller.write(clusterService.capitalize())
     controller.reset()
 
     val leapmotionEnabled = System.getProperty("leapmotion.enabled")
@@ -92,5 +92,8 @@ fun main(args: Array<String>) {
     }
 
     // ensure we shutdown nicely on exit
-    Runtime.getRuntime().addShutdownHook(Thread() { cdiContainer.shutdown() })
+    Runtime.getRuntime().addShutdownHook(Thread() {
+        launchpad.reset(LaunchpadEvent.reset())
+        cdiContainer.shutdown()
+    })
 }

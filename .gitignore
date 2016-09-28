@@ -9,6 +9,7 @@ target/
 *.versionsBackup
 
 # Gradle
+.gradletasknamecache
 .gradle/
 build/
 

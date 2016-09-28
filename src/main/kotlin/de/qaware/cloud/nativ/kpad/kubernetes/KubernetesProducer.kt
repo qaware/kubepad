@@ -38,13 +38,16 @@ import javax.inject.Inject
  */
 @ApplicationScoped
 open class KubernetesProducer @Inject constructor(@ConfigProperty(name = "kubernetes.master")
-                                                  private val master: String) {
+                                                  private val master: String?) {
 
     @Produces
     @Default
     open fun kubernetesClient(): KubernetesClient {
         System.setProperty(Config.KUBERNETES_TRUST_CERT_SYSTEM_PROPERTY, "true")
-        System.setProperty(Config.KUBERNETES_MASTER_SYSTEM_PROPERTY, master)
+        if (!master.isNullOrBlank()) {
+            // only set the master if specified
+            System.setProperty(Config.KUBERNETES_MASTER_SYSTEM_PROPERTY, master)
+        }
 
         val config = ConfigBuilder().build()
         return DefaultKubernetesClient(config)

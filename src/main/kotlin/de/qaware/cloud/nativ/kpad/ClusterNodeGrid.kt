@@ -138,13 +138,17 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
             0.until(active.count() - replicas).forEach {
                 val node = active[active.count() - it - 1]
                 node.update(ClusterNode.Phase.Succeeded)
-                stopping(node)
+                // stopping(node)
+                node.deactivate()
+                stopped(node)
             }
         } else if (active.count() < replicas) { // scale up, start nodes and update display
             0.until(replicas - active.count()).forEach {
                 val node = grid[row].first { !it.active.get() }
-                node.activate().update(ClusterNode.Phase.Pending)
-                starting(node)
+                // node.activate().update(ClusterNode.Phase.Pending)
+                // starting(node)
+                node.activate().update(ClusterNode.Phase.Running)
+                started(node)
             }
         }
     }
@@ -209,8 +213,10 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
                 val range = 0..Math.min(toStart - 1, nonRunning.size - 1)
                 range.forEach {
                     val node = nonRunning[it]
-                    node.activate().update(ClusterNode.Phase.Pending)
-                    starting(node)
+                    // node.activate().update(ClusterNode.Phase.Pending)
+                    // starting(node)
+                    node.activate().update(ClusterNode.Phase.Running)
+                    started(node)
                 }
             }
 
@@ -219,7 +225,9 @@ open class ClusterNodeGrid @Inject constructor(@Named("default")
                 val toStop = running.size - event.replicas
                 running.reversed().subList(0, toStop).forEach {
                     it.update(ClusterNode.Phase.Succeeded)
-                    stopping(it)
+                    // stopping(it)
+                    it.deactivate()
+                    stopped(it)
                 }
             }
 

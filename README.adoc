@@ -47,6 +47,7 @@ The four buttons on the right of the top row have a special meaning:
 
 The appearance of apps on the launchpad can be specified with following labels:
 
+- `LAUNCHPAD_ENABLE`: set to `true or `false`, only when `true` this app is displayed.
 - `LAUNCHPAD_COLOR`: Sets the color for all instances of the app on the launchpad.
   Can be either RED, ORANGE, YELLOW, LIGHT_GREEN, CYAN, LIGHT_BLUE, BLUE or PURPLE
 - `LAUNCHPAD_ROW`: Displays the app in the specified row (0-7)

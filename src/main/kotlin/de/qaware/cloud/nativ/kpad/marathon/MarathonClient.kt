@@ -34,7 +34,7 @@ import javax.enterprise.context.ApplicationScoped
 @ApplicationScoped
 interface MarathonClient {
 
-    @GET("v2/apps?embed=apps.deployments")
+    @GET("v2/apps?label=LAUNCHPAD_ENABLE==true")
     fun listApps(): Call<Apps>
 
     @PUT("v2/apps/{app_id}")
@@ -42,6 +42,9 @@ interface MarathonClient {
 
     @GET("v2/apps/{app_id}/tasks")
     fun listTasksOfApp(@Path("app_id") appId: String): Call<Tasks>
+
+    @GET("v2/groups")
+    fun listGroups(): Call<Groups>
 
     @GET("v2/tasks")
     fun listTasks(@Query("status") status: String = ""): Call<Tasks>
@@ -53,6 +56,10 @@ interface MarathonClient {
                    val deployments: List<Deployment>, val labels: Map<String, String>)
 
     data class Apps(val apps: List<App>)
+
+    data class Group(val id: String)
+
+    data class Groups(val groups: List<Group>)
 
     data class ScalingUpdate(val instances: Int)
 

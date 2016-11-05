@@ -46,7 +46,7 @@ license {
 }
 
 group = 'de.qaware.cloud.nativ.kpad'
-version = '1.1.1'
+version = '1.2.0'
 
 mainClassName = 'de.qaware.cloud.nativ.kpad.KubepadApplication'
 applicationDefaultJvmArgs = ['-Djava.library.path=../lib']
@@ -123,3 +123,13 @@ distributions {
         }
     }
 }
+
+task createDcosPadStartScripts(type: CreateStartScripts) {
+    outputDir = file('build/scripts')
+    mainClassName = 'de.qaware.cloud.nativ.kpad.KubepadApplication'
+    applicationName = 'dcospad'
+    defaultJvmOpts = ['-Djava.library.path=../lib', '-Dcluster.service=marathon']
+    classpath = startScripts.classpath
+}
+
+startScripts.dependsOn createDcosPadStartScripts

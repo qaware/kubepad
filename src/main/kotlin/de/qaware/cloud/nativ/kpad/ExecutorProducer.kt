@@ -40,11 +40,11 @@ class ExecutorProducer {
 
     @Produces
     @Named("default")
-    fun executor(): ExecutorService = Executors.newFixedThreadPool(2)
+    fun executor(): ExecutorService = Executors.newFixedThreadPool(4)
 
     @Produces
     @Named("scheduled")
-    fun scheduled(): ScheduledExecutorService = Executors.newScheduledThreadPool(2)
+    fun scheduled(): ScheduledExecutorService = Executors.newScheduledThreadPool(4)
 
     fun shutdown(@Disposes @Any executorService: ExecutorService) = executorService.shutdown()
 }

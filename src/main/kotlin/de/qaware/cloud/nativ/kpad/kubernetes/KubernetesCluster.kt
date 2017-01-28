@@ -89,6 +89,11 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
         }
 
         val labels = labels(deployment)
+
+        if (!"true".equals(labels["LAUNCHPAD_ENABLE"], true)) {
+            return
+        }
+
         if (labels.containsKey("LAUNCHPAD_ROW")) {
             val row = labels["LAUNCHPAD_ROW"]!!.toInt()
             if (deployments.indices.contains(row) && deployments[row] == null) {
@@ -143,7 +148,7 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
     override fun eventReceived(action: Watcher.Action?, resource: Deployment?) {
         when (action) {
             Watcher.Action.ADDED -> {
-                addDepolyment(Deployment())
+                addDepolyment(resource!!)
             }
 
             Watcher.Action.MODIFIED -> {

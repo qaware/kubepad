@@ -6,9 +6,11 @@
         bean-discovery-mode="annotated">
 
     <!-- -Dorg.apache.deltaspike.ProjectStage=Development -->
+    <!--
     <alternatives>
         <class>de.qaware.cloud.nativ.kpad.logging.LoggingReceiver</class>
         <class>de.qaware.cloud.nativ.kpad.logging.LoggingTransmitter</class>
     </alternatives>
+    -->
 
 </beans>

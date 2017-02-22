@@ -23,6 +23,9 @@
  */
 package de.qaware.cloud.nativ.kpad.launchpad
 
+import de.qaware.cloud.nativ.kpad.logging.LoggingReceiver
+import de.qaware.cloud.nativ.kpad.logging.LoggingTransmitter
+import org.slf4j.LoggerFactory
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.inject.Default
 import javax.enterprise.inject.Disposes
@@ -39,11 +42,23 @@ class MidiSystemProducer {
 
     @Produces
     @Default
-    fun transmitter(): Transmitter = MidiSystem.getTransmitter()
+    fun transmitter(): Transmitter {
+        if ("true".equals(System.getProperty("transmitter.disabled"), true)) {
+            return LoggingTransmitter(LoggerFactory.getLogger(LoggingTransmitter::class.java))
+        } else {
+            return MidiSystem.getTransmitter()
+        }
+    }
 
     @Produces
     @Default
-    fun receiver(): Receiver = MidiSystem.getReceiver()
+    fun receiver(): Receiver {
+        if ("true".equals(System.getProperty("receiver.disabled"), true)) {
+            return LoggingReceiver(LoggerFactory.getLogger(LoggingTransmitter::class.java))
+        } else {
+            return MidiSystem.getReceiver()
+        }
+    }
 
     fun close(@Disposes transmitter: Transmitter) = transmitter.close()
 

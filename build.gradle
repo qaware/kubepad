@@ -135,3 +135,13 @@ task createDcosPadStartScripts(type: CreateStartScripts) {
 }
 
 startScripts.dependsOn createDcosPadStartScripts
+
+task createOcPadStartScripts(type: CreateStartScripts) {
+    outputDir = file('build/scripts')
+    mainClassName = 'de.qaware.cloud.nativ.kpad.KubepadApplication'
+    applicationName = 'ocpad'
+    defaultJvmOpts = ['-Djava.library.path=../lib', '-Dcluster.service=openshift']
+    classpath = startScripts.classpath
+}
+
+startScripts.dependsOn createOcPadStartScripts

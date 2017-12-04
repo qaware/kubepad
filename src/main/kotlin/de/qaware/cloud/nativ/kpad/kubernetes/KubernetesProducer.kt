@@ -28,6 +28,7 @@ import io.fabric8.kubernetes.client.ConfigBuilder
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClient
 import org.apache.deltaspike.core.api.config.ConfigProperty
+import org.apache.deltaspike.core.api.exclude.Exclude
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.inject.Default
 import javax.enterprise.inject.Produces
@@ -36,6 +37,7 @@ import javax.inject.Inject
 /**
  * The CDI producer for the Kubernetes Java API.
  */
+@Exclude(onExpression = "cluster.service!=kubernetes")
 @ApplicationScoped
 open class KubernetesProducer @Inject constructor(@ConfigProperty(name = "kubernetes.master")
                                                   private val master: String?) {

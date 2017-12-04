@@ -28,6 +28,7 @@ import io.fabric8.openshift.client.OpenShiftClient
 import io.fabric8.openshift.client.OpenShiftConfig
 import io.fabric8.openshift.client.OpenShiftConfigBuilder
 import org.apache.deltaspike.core.api.config.ConfigProperty
+import org.apache.deltaspike.core.api.exclude.Exclude
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.inject.Default
 import javax.enterprise.inject.Produces
@@ -36,6 +37,7 @@ import javax.inject.Inject
 /**
  * The CDI producer for the OpenShift Java API.
  */
+@Exclude(onExpression = "cluster.service!=openshift")
 @ApplicationScoped
 open class OpenShiftProducer @Inject constructor(@ConfigProperty(name = "openshift.url")
                                                  private val master: String?) {

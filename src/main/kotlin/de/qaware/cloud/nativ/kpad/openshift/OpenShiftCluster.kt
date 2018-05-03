@@ -53,6 +53,7 @@ open class OpenShiftCluster @Inject constructor(private val client: OpenShiftCli
 
     private val deployments = Array<DeploymentConfig?>(8, { i -> null })
     private val names = Array<String?>(8, { i -> null })
+    private var disableEvents = true
 
     @PostConstruct
     open fun init() {
@@ -65,6 +66,7 @@ open class OpenShiftCluster @Inject constructor(private val client: OpenShiftCli
 
         // does not work with GCE (No HTTP 101)
         operation.watch(this)
+        disableEvents = false
     }
 
     override fun appExists(appIndex: Int) = deployments.indices.contains(appIndex) && deployments[appIndex] != null
@@ -86,7 +88,7 @@ open class OpenShiftCluster @Inject constructor(private val client: OpenShiftCli
         var index = deployments.indexOfFirst { it == null }
 
         if (names.contains(name)) {
-            logger.info("Deployment with name {} already added. Ignored.")
+            logger.info("Deployment with name {} already added. Ignored.", name)
             return
         }
 
@@ -140,19 +142,29 @@ open class OpenShiftCluster @Inject constructor(private val client: OpenShiftCli
     }
 
     override fun reset() {
-        0.until(8).forEach {
-            deployments[it] = null
-            names[it] = null
-        }
+        disableEvents = true
+        try {
+            0.until(8).forEach {
+                deployments[it] = null
+                names[it] = null
+            }
 
-        val operation = client.deploymentConfigs().inNamespace(namespace)
-        val list = operation.list()
-        list?.items?.forEach {
-            addDepolyment(it)
+            val operation = client.deploymentConfigs().inNamespace(namespace)
+            val list = operation.list()
+            list?.items?.forEach {
+                addDepolyment(it)
+            }
+        } finally {
+            disableEvents = false
         }
     }
 
     override fun eventReceived(action: Watcher.Action?, resource: DeploymentConfig?) {
+        if (disableEvents) {
+            logger.info("Event {} not processed as globally disabled. Resource={}", action, resource)
+            return
+        }
+
         when (action) {
             Watcher.Action.ADDED -> {
                 addDepolyment(resource!!)

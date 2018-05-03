@@ -51,6 +51,7 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
 
     private val deployments = Array<Deployment?>(8, { i -> null })
     private val names = Array<String?>(8, { i -> null })
+    private var disableEvents = true
 
     @PostConstruct
     open fun init() {
@@ -63,6 +64,8 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
 
         // does not work with GCE (No HTTP 101)
         operation.watch(this)
+
+        disableEvents = false
     }
 
     override fun appExists(appIndex: Int) = deployments.indices.contains(appIndex) && deployments[appIndex] != null
@@ -84,7 +87,7 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
         var index = deployments.indexOfFirst { it == null }
 
         if (names.contains(name)) {
-            logger.info("Deployment with name {} already added. Ignored.")
+            logger.info("Deployment with name {} already added. Ignored.", name)
             return
         }
 
@@ -138,19 +141,30 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
     }
 
     override fun reset() {
-        0.until(8).forEach {
-            deployments[it] = null
-            names[it] = null
+        disableEvents = true
+        try {
+            0.until(8).forEach {
+                deployments[it] = null
+                names[it] = null
+            }
+
+            val operation = client.extensions().deployments().inNamespace(namespace)
+            val list = operation.list()
+            list?.items?.forEach {
+                addDepolyment(it)
+            }
+        } finally {
+            disableEvents = false
         }
 
-        val operation = client.extensions().deployments().inNamespace(namespace)
-        val list = operation.list()
-        list?.items?.forEach {
-            addDepolyment(it)
-        }
     }
 
     override fun eventReceived(action: Watcher.Action?, resource: Deployment?) {
+        if (disableEvents) {
+            logger.info("Event {} not processed as globally disabled. Resource={}", action, resource)
+            return
+        }
+
         when (action) {
             Watcher.Action.ADDED -> {
                 addDepolyment(resource!!)

@@ -40,6 +40,8 @@ import javax.inject.Inject
 
 /**
  * This class handles the DeploymentConfigs on OpenShift.
+ *
+ * TODO Remove duplications to {@link de.qaware.cloud.nativ.kpad.kubernetes.KubernetesCluster}
  */
 @Exclude(onExpression = "cluster.service!=openshift")
 @ApplicationScoped
@@ -82,6 +84,11 @@ open class OpenShiftCluster @Inject constructor(private val client: OpenShiftCli
     private fun addDepolyment(deployment: DeploymentConfig) {
         val name = KubernetesHelper.getName(deployment)
         var index = deployments.indexOfFirst { it == null }
+
+        if (names.contains(name)) {
+            logger.info("Deployment with name {} already added. Ignored.")
+            return
+        }
 
         if (index == -1) {
             logger.info("Found new DeploymentConfig {} but could not add because all rows are occupied.", name)

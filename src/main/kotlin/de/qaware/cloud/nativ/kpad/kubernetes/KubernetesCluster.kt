@@ -83,6 +83,11 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
         val name = KubernetesHelper.getName(deployment)
         var index = deployments.indexOfFirst { it == null }
 
+        if (names.contains(name)) {
+            logger.info("Deployment with name {} already added. Ignored.")
+            return
+        }
+
         if (index == -1) {
             logger.info("Found new deployment {} but could not add because all rows are occupied.", name)
             return

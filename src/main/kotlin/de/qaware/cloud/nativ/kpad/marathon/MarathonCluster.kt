@@ -46,8 +46,8 @@ open class MarathonCluster @Inject constructor(private val client: MarathonClien
                                                private val events: Event<ClusterAppEvent>,
                                                private val logger: Logger) : Cluster {
 
-    private val apps = Array<MarathonClient.App?>(8, { i -> null })
-    private val deploying = Array<Boolean>(8, { i -> false })
+    private val apps = Array<MarathonClient.App?>(8, { _ -> null })
+    private val deploying = Array<Boolean>(8, { _ -> false })
 
     @PostConstruct
     open fun init() {

@@ -51,8 +51,8 @@ open class OpenShiftCluster @Inject constructor(private val client: OpenShiftCli
                                                 private val events: Event<ClusterAppEvent>,
                                                 private val logger: Logger) : Watcher<DeploymentConfig>, Cluster {
 
-    private val deployments = Array<DeploymentConfig?>(8, { i -> null })
-    private val names = Array<String?>(8, { i -> null })
+    private val deployments = Array<DeploymentConfig?>(8, { _ -> null })
+    private val names = Array<String?>(8, { _ -> null })
     private var disableEvents = true
 
     @PostConstruct

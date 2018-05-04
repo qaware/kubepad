@@ -49,8 +49,8 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
                                                  private val events: Event<ClusterAppEvent>,
                                                  private val logger: Logger) : Watcher<Deployment>, Cluster {
 
-    private val deployments = Array<Deployment?>(8, { i -> null })
-    private val names = Array<String?>(8, { i -> null })
+    private val deployments = Array<Deployment?>(8, { _ -> null })
+    private val names = Array<String?>(8, { _ -> null })
     private var disableEvents = true
 
     @PostConstruct

@@ -20,3 +20,11 @@ kubernetes.tar.gz
 
 # OSX
 *.DS_Store
+
+# Eclipse
+/.classpath
+/.project
+/.settings/
+
+/bin/
+/out/

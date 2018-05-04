@@ -27,6 +27,7 @@ import com.google.gson.GsonBuilder
 import com.moandjiezana.toml.Toml
 import okhttp3.OkHttpClient
 import org.apache.deltaspike.core.api.config.ConfigProperty
+import org.apache.deltaspike.core.api.exclude.Exclude
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
@@ -38,6 +39,7 @@ import javax.inject.Inject
 /**
  * The CDI producer for the Marathon Java API.
  */
+@Exclude(onExpression = "cluster.service!=marathon")
 @ApplicationScoped
 open class MarathonProducer @Inject constructor(@ConfigProperty(name = "dcos.configPath")
                                                 private val configPath: String?) {

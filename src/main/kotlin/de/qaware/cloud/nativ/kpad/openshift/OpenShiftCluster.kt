@@ -49,8 +49,9 @@ open class OpenShiftCluster @Inject constructor(private val client: OpenShiftCli
                                                 private val events: Event<ClusterAppEvent>,
                                                 private val logger: Logger) : Watcher<DeploymentConfig>, Cluster {
 
-    private val deployments = Array<DeploymentConfig?>(8, { i -> null })
-    private val names = Array<String?>(8, { i -> null })
+    private val deploymentConfigs = Array<DeploymentConfig?>(8, { _ -> null })
+    private val names = Array<String?>(8, { _ -> null })
+    private var disableEvents = true
 
     @PostConstruct
     open fun init() {
@@ -58,17 +59,18 @@ open class OpenShiftCluster @Inject constructor(private val client: OpenShiftCli
         val operation = client.deploymentConfigs().inNamespace(namespace)
         val list = operation.list()
         list?.items?.forEach {
-            addDepolyment(it)
+            addDeploymentConfig(it)
         }
 
         // does not work with GCE (No HTTP 101)
         operation.watch(this)
+        disableEvents = false
     }
 
-    override fun appExists(appIndex: Int) = deployments.indices.contains(appIndex) && deployments[appIndex] != null
+    override fun appExists(appIndex: Int) = deploymentConfigs.indices.contains(appIndex) && deploymentConfigs[appIndex] != null
 
     override fun labels(appIndex: Int): Map<String, String> {
-        return labels(deployments[appIndex])
+        return labels(deploymentConfigs[appIndex])
     }
 
     private fun labels(deployment: DeploymentConfig?): Map<String, String> {
@@ -76,19 +78,24 @@ open class OpenShiftCluster @Inject constructor(private val client: OpenShiftCli
     }
 
     override fun replicas(appIndex: Int): Int {
-        return deployments[appIndex]?.spec?.replicas ?: -1
+        return deploymentConfigs[appIndex]?.spec?.replicas ?: -1
     }
 
-    private fun addDepolyment(deployment: DeploymentConfig) {
-        val name = KubernetesHelper.getName(deployment)
-        var index = deployments.indexOfFirst { it == null }
+    private fun addDeploymentConfig(deploymentConfig: DeploymentConfig) {
+        val name = KubernetesHelper.getName(deploymentConfig)
+        var index = deploymentConfigs.indexOfFirst { it == null }
+
+        if (names.contains(name)) {
+            logger.info("DeploymentConfig with name {} already added. Ignored.", name)
+            return
+        }
 
         if (index == -1) {
             logger.info("Found new DeploymentConfig {} but could not add because all rows are occupied.", name)
             return
         }
 
-        val labels = labels(deployment)
+        val labels = labels(deploymentConfig)
 
         if (!"true".equals(labels["LAUNCHPAD_ENABLE"], true)) {
             return
@@ -96,66 +103,76 @@ open class OpenShiftCluster @Inject constructor(private val client: OpenShiftCli
 
         if (labels.containsKey("LAUNCHPAD_ROW")) {
             val row = labels["LAUNCHPAD_ROW"]!!.toInt()
-            if (deployments.indices.contains(row) && deployments[row] == null) {
+            if (deploymentConfigs.indices.contains(row) && deploymentConfigs[row] == null) {
                 index = row
             }
         }
 
-        deployments[index] = deployment
+        deploymentConfigs[index] = deploymentConfig
         names[index] = name
         logger.info("Added DeploymentConfig {} at index {}.", name, index)
-        events.fire(ClusterAppEvent(index, replicas(index), labels(deployment), ClusterAppEvent.Type.ADDED))
+        events.fire(ClusterAppEvent(index, replicas(index), labels(deploymentConfig), ClusterAppEvent.Type.ADDED))
     }
 
     /**
-     * Scale the OpenShift deployment to a number of given replicas.
+     * Scale the OpenShift deployment config to a number of given replicas.
      *
      * @param appIndex the deployment index on the Launchpad
      * @param replicas the number of replicas
      */
     override fun scale(appIndex: Int, replicas: Int) {
-        if (appIndex > deployments.size) return
+        if (appIndex > deploymentConfigs.size) return
 
-        val deployment = deployments[appIndex]
-        val name = KubernetesHelper.getName(deployment)
+        val deploymentConfig = deploymentConfigs[appIndex]
+        val name = KubernetesHelper.getName(deploymentConfig)
 
         logger.info("Scaling DeploymentConfig {} to {} replicas.",
-                KubernetesHelper.getName(deployment), replicas)
+                KubernetesHelper.getName(deploymentConfig), replicas)
 
         synchronized(client) {
-            deployments[appIndex] = client.deploymentConfigs().inNamespace(namespace).withName(name)
+            deploymentConfigs[appIndex] = client.deploymentConfigs().inNamespace(namespace).withName(name)
                     .edit().editSpec()
                     .withReplicas(replicas)
                     .endSpec().done()
         }
 
-        events.fire(ClusterAppEvent(appIndex, replicas, labels(deployment), ClusterAppEvent.Type.DEPLOYED))
+        events.fire(ClusterAppEvent(appIndex, replicas, labels(deploymentConfig), ClusterAppEvent.Type.DEPLOYED))
     }
 
     override fun reset() {
-        0.until(8).forEach {
-            deployments[it] = null
-            names[it] = null
-        }
+        disableEvents = true
+        try {
+            0.until(8).forEach {
+                deploymentConfigs[it] = null
+                names[it] = null
+            }
 
-        val operation = client.deploymentConfigs().inNamespace(namespace)
-        val list = operation.list()
-        list?.items?.forEach {
-            addDepolyment(it)
+            val operation = client.deploymentConfigs().inNamespace(namespace)
+            val list = operation.list()
+            list?.items?.forEach {
+                addDeploymentConfig(it)
+            }
+        } finally {
+            disableEvents = false
         }
     }
 
     override fun eventReceived(action: Watcher.Action?, resource: DeploymentConfig?) {
+        if (disableEvents) {
+            logger.info("Event {} not processed as globally disabled. Resource={}", action, resource)
+            return
+        }
+
         when (action) {
             Watcher.Action.ADDED -> {
-                addDepolyment(resource!!)
+                addDeploymentConfig(resource!!)
             }
 
             Watcher.Action.MODIFIED -> {
                 val name = KubernetesHelper.getName(resource)
                 val index = names.indexOf(name)
-                val previous = deployments[index]
-                deployments[index] = resource
+                val previous = deploymentConfigs[index]
+                deploymentConfigs[index] = resource
 
                 // now check if the number of replicas has changed
                 val oldReplicas = previous?.spec?.replicas ?: 0
@@ -175,7 +192,7 @@ open class OpenShiftCluster @Inject constructor(private val client: OpenShiftCli
                 logger.info("Deleted DeploymentConfig {}.", name)
 
                 val index = names.indexOf(name)
-                deployments[index] = null
+                deploymentConfigs[index] = null
                 names[index] = null
 
                 events.fire(ClusterAppEvent(index, 0, labels(resource), ClusterAppEvent.Type.DELETED))

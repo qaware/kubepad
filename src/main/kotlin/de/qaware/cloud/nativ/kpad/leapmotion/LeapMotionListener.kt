@@ -51,7 +51,7 @@ class LeapMotionListener constructor(private val launchpad: LaunchpadController,
                     val swipe = SwipeGesture(gesture)
                     if (swipe.state() == Gesture.State.STATE_STOP) {
                         // scale cluster by number of fingers
-                        val fingers = frame?.fingers()?.count() ?: -1
+                        val fingers = frame.fingers()?.count() ?: -1
                         logger.debug("Detected swipe gesture with {} fingers.", fingers)
                         launchpad.scale(fingers)
                     }

@@ -37,7 +37,7 @@ import javax.sound.midi.Receiver
  */
 @ApplicationScoped
 @Alternative
-@Exclude(exceptIfProjectStage = arrayOf(ProjectStage.Development::class))
+@Exclude(exceptIfProjectStage = [(ProjectStage.Development::class)])
 open class LoggingReceiver @Inject constructor(private val logger: Logger) : Receiver {
 
     override fun send(message: MidiMessage?, timeStamp: Long) {

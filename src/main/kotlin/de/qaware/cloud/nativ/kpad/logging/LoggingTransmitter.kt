@@ -37,7 +37,7 @@ import javax.sound.midi.Transmitter
  */
 @ApplicationScoped
 @Alternative
-@Exclude(exceptIfProjectStage = arrayOf(ProjectStage.Development::class))
+@Exclude(exceptIfProjectStage = [(ProjectStage.Development::class)])
 open class LoggingTransmitter @Inject constructor(private val logger: Logger) : Transmitter {
 
     private var receiver: Receiver? = null

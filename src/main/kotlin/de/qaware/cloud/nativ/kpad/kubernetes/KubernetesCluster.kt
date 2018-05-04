@@ -49,8 +49,9 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
                                                  private val events: Event<ClusterAppEvent>,
                                                  private val logger: Logger) : Watcher<Deployment>, Cluster {
 
-    private val deployments = Array<Deployment?>(8, { i -> null })
-    private val names = Array<String?>(8, { i -> null })
+    private val deployments = Array<Deployment?>(8, { _ -> null })
+    private val names = Array<String?>(8, { _ -> null })
+    private var disableEvents = true
 
     @PostConstruct
     open fun init() {
@@ -63,6 +64,8 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
 
         // does not work with GCE (No HTTP 101)
         operation.watch(this)
+
+        disableEvents = false
     }
 
     override fun appExists(appIndex: Int) = deployments.indices.contains(appIndex) && deployments[appIndex] != null
@@ -82,6 +85,11 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
     private fun addDepolyment(deployment: Deployment) {
         val name = KubernetesHelper.getName(deployment)
         var index = deployments.indexOfFirst { it == null }
+
+        if (names.contains(name)) {
+            logger.info("Deployment with name {} already added. Ignored.", name)
+            return
+        }
 
         if (index == -1) {
             logger.info("Found new deployment {} but could not add because all rows are occupied.", name)
@@ -133,19 +141,30 @@ open class KubernetesCluster @Inject constructor(private val client: KubernetesC
     }
 
     override fun reset() {
-        0.until(8).forEach {
-            deployments[it] = null
-            names[it] = null
+        disableEvents = true
+        try {
+            0.until(8).forEach {
+                deployments[it] = null
+                names[it] = null
+            }
+
+            val operation = client.extensions().deployments().inNamespace(namespace)
+            val list = operation.list()
+            list?.items?.forEach {
+                addDepolyment(it)
+            }
+        } finally {
+            disableEvents = false
         }
 
-        val operation = client.extensions().deployments().inNamespace(namespace)
-        val list = operation.list()
-        list?.items?.forEach {
-            addDepolyment(it)
-        }
     }
 
     override fun eventReceived(action: Watcher.Action?, resource: Deployment?) {
+        if (disableEvents) {
+            logger.info("Event {} not processed as globally disabled. Resource={}", action, resource)
+            return
+        }
+
         when (action) {
             Watcher.Action.ADDED -> {
                 addDepolyment(resource!!)

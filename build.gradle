@@ -58,10 +58,10 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
-    compile 'io.fabric8:kubernetes-api:2.3.7'
-    compile 'io.fabric8:kubernetes-model:1.1.4'
-    compile 'io.fabric8:kubernetes-client:2.6.3'
-    compile 'io.fabric8:openshift-client:2.6.3'
+    compile 'io.fabric8:kubernetes-api:3.0.12'
+    compile 'io.fabric8:kubernetes-model:4.6.1'
+    compile 'io.fabric8:kubernetes-client:4.6.1'
+    compile 'io.fabric8:openshift-client:4.6.1'
 
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'

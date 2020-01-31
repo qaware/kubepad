@@ -26,7 +26,7 @@ package de.qaware.cloud.nativ.kpad.kubernetes
 import de.qaware.cloud.nativ.kpad.Cluster
 import de.qaware.cloud.nativ.kpad.ClusterAppEvent
 import io.fabric8.kubernetes.api.KubernetesHelper
-import io.fabric8.kubernetes.api.model.extensions.Deployment
+import io.fabric8.kubernetes.api.model.apps.Deployment
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientException
 import io.fabric8.kubernetes.client.Watcher

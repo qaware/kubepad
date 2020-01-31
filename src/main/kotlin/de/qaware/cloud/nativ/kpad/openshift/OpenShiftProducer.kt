@@ -49,7 +49,7 @@ open class OpenShiftProducer @Inject constructor(@ConfigProperty(name = "openshi
         if (!master.isNullOrBlank()) {
             // only set the master if specified
             System.setProperty(OpenShiftConfig.KUBERNETES_MASTER_SYSTEM_PROPERTY, master)
-            System.setProperty(OpenShiftConfig.OPENSHIFT_URL_SYTEM_PROPERTY, master)
+            System.setProperty(OpenShiftConfig.OPENSHIFT_URL_SYSTEM_PROPERTY, master)
         }
 
         val config = OpenShiftConfigBuilder(false).build()

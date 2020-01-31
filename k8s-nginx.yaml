@@ -4,7 +4,6 @@ metadata:
   name: nginx
   labels:
     app: nginx
-    tier: backend
 spec:
   type: NodePort
   ports:
@@ -12,29 +11,235 @@ spec:
   - port: 80
   selector:
     app: nginx
-    tier: backend
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx
+  name: nginx-0
   labels:
       cloudcontrol.enabled: "true"
       cloudcontrol.index: "0"
       LAUNCHPAD_ENABLE: "true"
-      LAUNCHPAD_COLOR: LIGHT_GREEN
+      LAUNCHPAD_COLOR: RED
       LAUNCHPAD_ROW: "0"
 spec:
-  # modify it according to your case
   replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+      row: "0"
   template:
     metadata:
       labels:
         app: nginx
-        tier: backend
+        row: "0"
     spec:
       containers:
-      - name: nginx
-        image: nginx
+      - name: nginx-0
+        image: nginx:1.17.4
+        ports:
+        - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-1
+  labels:
+      cloudcontrol.enabled: "true"
+      cloudcontrol.index: "1"
+      LAUNCHPAD_ENABLE: "true"
+      LAUNCHPAD_COLOR: ORANGE
+      LAUNCHPAD_ROW: "1"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+      row: "1"
+  template:
+    metadata:
+      labels:
+        app: nginx
+        row: "1"
+    spec:
+      containers:
+      - name: nginx-1
+        image: nginx:1.17.4-alpine
+        ports:
+        - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-2
+  labels:
+      cloudcontrol.enabled: "true"
+      cloudcontrol.index: "2"
+      LAUNCHPAD_ENABLE: "true"
+      LAUNCHPAD_COLOR: YELLOW
+      LAUNCHPAD_ROW: "2"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+      row: "2"
+  template:
+    metadata:
+      labels:
+        app: nginx
+        row: "2"
+    spec:
+      containers:
+      - name: nginx-2
+        image: nginx:1.16.1
+        ports:
+        - containerPort: 80
+      - name: busybox
+        image: busybox:1.31.0
+        command: ["sleep"]
+        args: ["120"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-3
+  labels:
+      cloudcontrol.enabled: "true"
+      cloudcontrol.index: "3"
+      LAUNCHPAD_ENABLE: "true"
+      LAUNCHPAD_COLOR: CYAN
+      LAUNCHPAD_ROW: "3"
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: nginx
+      row: "3"
+  template:
+    metadata:
+      labels:
+        app: nginx
+        row: "3"
+    spec:
+      containers:
+      - name: nginx-3
+        image: nginx:1.16.1-alpine
+        ports:
+        - containerPort: 80
+      - name: alpine
+        image: alpine:3.10.2
+        command: ["sleep"]
+        args: ["180"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-4
+  labels:
+      cloudcontrol.enabled: "true"
+      cloudcontrol.index: "4"
+      LAUNCHPAD_ENABLE: "true"
+      LAUNCHPAD_COLOR: BLUE
+      LAUNCHPAD_ROW: "4"
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: nginx
+      row: "4"
+  template:
+    metadata:
+      labels:
+        app: nginx
+        row: "4"
+    spec:
+      containers:
+      - name: nginx-4
+        image: nginx:1.17.4
+        ports:
+        - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-5
+  labels:
+      cloudcontrol.enabled: "true"
+      cloudcontrol.index: "5"
+      LAUNCHPAD_ENABLE: "true"
+      LAUNCHPAD_COLOR: PURPLE
+      LAUNCHPAD_ROW: "5"
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      app: nginx
+      row: "5"
+  template:
+    metadata:
+      labels:
+        app: nginx
+        row: "5"
+    spec:
+      containers:
+      - name: nginx-5
+        image: nginx:1.17.4-alpine
+        ports:
+        - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-6
+  labels:
+      cloudcontrol.enabled: "true"
+      cloudcontrol.index: "6"
+      LAUNCHPAD_ENABLE: "true"
+      LAUNCHPAD_COLOR: LIGHT_BLUE
+      LAUNCHPAD_ROW: "6"
+spec:
+  replicas: 7
+  selector:
+    matchLabels:
+      app: nginx
+      row: "6"
+  template:
+    metadata:
+      labels:
+        app: nginx
+        row: "6"
+    spec:
+      containers:
+      - name: nginx-6
+        image: openresty/openresty:1.15.8.2-4-alpine
+        ports:
+        - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-7
+  labels:
+      cloudcontrol.enabled: "true"
+      cloudcontrol.index: "7"
+      LAUNCHPAD_ENABLE: "true"
+      LAUNCHPAD_COLOR: LIGHT_GREEN
+      LAUNCHPAD_ROW: "7"
+spec:
+  replicas: 8
+  selector:
+    matchLabels:
+      app: nginx
+      row: "7"
+  template:
+    metadata:
+      labels:
+        app: nginx
+        row: "7"
+    spec:
+      containers:
+      - name: nginx-7
+        image: openresty/openresty:1.15.8.2-4-stretch
         ports:
         - containerPort: 80
